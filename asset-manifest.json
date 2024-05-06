@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/ShowGo-Scheme-Renderer/static/css/main.af0cbc06.css",
+    "main.js": "/ShowGo-Scheme-Renderer/static/js/main.2b9b961c.js",
+    "index.html": "/ShowGo-Scheme-Renderer/index.html",
+    "main.af0cbc06.css.map": "/ShowGo-Scheme-Renderer/static/css/main.af0cbc06.css.map",
+    "main.2b9b961c.js.map": "/ShowGo-Scheme-Renderer/static/js/main.2b9b961c.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.af0cbc06.css",
+    "static/js/main.2b9b961c.js"
+  ]
+}
