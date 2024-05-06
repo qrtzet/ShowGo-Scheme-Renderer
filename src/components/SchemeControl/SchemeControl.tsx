@@ -1,5 +1,6 @@
 import {ClickedElementType} from '@features/SchemeRenderer';
 import {generateSeatText} from '@utils/generateSeatText';
+import classNames from 'classnames';
 import {LegacyRef, ReactNode, RefObject, useCallback, useEffect} from 'react';
 import {Tooltip} from 'react-tooltip';
 import {
@@ -16,6 +17,7 @@ export type SchemeControlProps = {
   svgContainerRef: RefObject<HTMLDivElement>;
   scheme: ReactNode;
   onClick: (element: SVGElement, type: ClickedElementType) => void;
+  isInModal?: boolean;
 };
 
 export const SchemeControl = ({
@@ -24,6 +26,7 @@ export const SchemeControl = ({
   svgContainerRef,
   scheme,
   onClick,
+  isInModal = false,
 }: SchemeControlProps) => {
   const clickEventListener = useCallback(
     async (e: MouseEvent) => {
@@ -82,9 +85,15 @@ export const SchemeControl = ({
         centerOnInit
         onInit={onInit}>
         <TransformComponent
-          wrapperClass={styles.container}
-          contentClass={styles.container}>
-          <div ref={svgContainerRef} className={styles.container}>
+          contentClass={styles.content}
+          wrapperClass={classNames(styles.container, {
+            [styles.modal]: isInModal,
+          })}>
+          <div
+            ref={svgContainerRef}
+            className={classNames(styles.svgContainer, {
+              [styles.modal]: isInModal,
+            })}>
             {scheme}
           </div>
         </TransformComponent>

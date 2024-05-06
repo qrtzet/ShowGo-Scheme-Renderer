@@ -4,6 +4,7 @@ import {URLs} from '@atoms/urls/urls.atoms';
 export type FromWebActions = {
   isReady: boolean;
   basketChanged: number;
+  noScheme: boolean;
 };
 
 export type FromWebActionName = keyof FromWebActions;

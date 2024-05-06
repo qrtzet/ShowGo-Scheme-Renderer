@@ -101,6 +101,7 @@ export const SchemeTemplateModal = ({
       </div>
       <div className={styles.content}>
         <SchemeControl
+          isInModal
           onInit={handleContentInit}
           svgContainerRef={svgContainerRef}
           scheme={scheme}

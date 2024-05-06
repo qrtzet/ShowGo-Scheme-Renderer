@@ -41,6 +41,9 @@ export const addTicketToCartAtom = atom(
         position: 'top-center',
         theme: 'colored',
         autoClose: 1000,
+        style: {
+          marginTop: 40,
+        },
       });
     }
   },

@@ -43,6 +43,7 @@ export const SchemeRenderer = () => {
   const setTempUuid = useSetAtom(tempUuidAtom);
   const setSelectedSector = useSetAtom(selectedSectorAtom);
   const getTickets = useSetAtom(getTicketsInCartAtom);
+  const setSessionSlug = useSetAtom(sessionSlugAtom);
 
   const zoomRef = useRef<ReactZoomPanPinchRef | null>(null);
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
@@ -57,7 +58,11 @@ export const SchemeRenderer = () => {
     sendMessageToRN('basketChanged', tickets.length);
   }, [tickets.length]);
 
-  useRNHandler('sessionSlug', useSetAtom(sessionSlugAtom));
+  useRNHandler('sessionSlug', data => {
+    setTimeout(() => {
+      setSessionSlug(data);
+    }, 100);
+  });
   useRNHandler('user', useSetAtom(userAtom));
   useRNHandler('urls', useSetAtom(urlsAtom));
   useRNHandler('basketChanged', async ticketsCount => {
@@ -86,6 +91,14 @@ export const SchemeRenderer = () => {
   useEffect(() => {
     sendMessageToRN('isReady', true);
   }, []);
+
+  useEffect(() => {
+    if (sessionOrder) {
+      if (!sessionOrder?.scheme?.id) {
+        sendMessageToRN('noScheme', true);
+      }
+    }
+  }, [sessionOrder]);
 
   const handleContentInit = useCallback(
     async (ref: ReactZoomPanPinchRef) => {
