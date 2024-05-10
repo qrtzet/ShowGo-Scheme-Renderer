@@ -4,30 +4,33 @@
   width: 100vw!important;
   height: 100vh!important;
 
-  .sectorButton {
+  .sectorButtonContainer {
     position: absolute;
-    bottom: 40px;
+    bottom: 132px;
     right: 12px;
-    padding: 4px 12px;
-    background-color: #1C77DE;
-    border-radius: 8px;
-    font-weight: 600;
-    color: white;
-    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 
-    &:active {
-      opacity: .8;
+    .sectorButton {
+      padding: 4px 12px;
+      background-color: #1C77DE;
+      border-radius: 8px;
+      font-weight: 600;
+      color: white;
+      font-size: 18px;
+
+      &:active {
+        opacity: .8;
+      }
     }
-
     .sectorButtonHelper {
-      position: absolute;
-      left: -150px;
-      top: 8px;
       font-size: 12px;
       text-wrap: nowrap;
-      width: 150px;
+      color: white;
     }
   }
+
 }
 
 

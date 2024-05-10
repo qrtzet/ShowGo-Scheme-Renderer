@@ -37,7 +37,6 @@ export const schemePressHandlerAtom = atom(
 
         if (isAlreadyExist?.id && type === 'seat') {
           await set(removeTicketFromCartAtom, seat.id);
-          set(isSchemeLoadingAtom, false);
           return;
         }
 
@@ -49,8 +48,6 @@ export const schemePressHandlerAtom = atom(
           eventId: sessionOrder.event?.id!,
           sessionId: sessionOrder.id,
         });
-
-        set(isSchemeLoadingAtom, false);
       };
 
       if (element?.id?.startsWith('seat_')) {

@@ -1,4 +1,3 @@
-import {TError} from '@type/http.type';
 import {convertTicketRes} from '@utils/convertTicketRes';
 import {atom} from 'jotai';
 import {atomWithImmer} from 'jotai-immer';
@@ -15,25 +14,33 @@ import {
   startReservationTimerAtom,
 } from './reservationTimer.atoms';
 
+let isFetching = false;
+
 export const ticketsInCartAtom = atomWithImmer<TicketInCart[]>([]);
 
 export const addTicketToCartAtom = atom(
   null,
   async (get, set, ticketData: AddTicketToCartData) => {
+    if (isFetching) {
+      return;
+    }
+
+    isFetching = true;
+
     try {
       const {payload} = await addTicket(ticketData);
 
-      if (payload) {
+      if (payload?.id) {
         set(restartReservationTimer);
         set(ticketsInCartAtom, draft => {
           draft.push(convertTicketRes(payload));
         });
-      }
 
-      const svgContainer = get(svgContainerAtom);
+        const svgContainer = get(svgContainerAtom);
 
-      if (svgContainer) {
-        await set(setSchemeColorsAtom, svgContainer);
+        if (svgContainer) {
+          await set(setSchemeColorsAtom, svgContainer);
+        }
       }
     } catch (e) {
       toast('Нехватка билетов', {
@@ -45,6 +52,8 @@ export const addTicketToCartAtom = atom(
           marginTop: 40,
         },
       });
+    } finally {
+      isFetching = false;
     }
   },
 );

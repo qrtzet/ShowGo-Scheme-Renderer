@@ -152,11 +152,11 @@ export const SchemeRenderer = () => {
       />
       <PriceFilter />
       {selectedSector && sessionOrder?.scheme?.sectors?.length && (
-        <div onClick={toggleTemplateModal} className={styles.sectorButton}>
-          {selectedSector?.title}
-          <span className={styles.sectorButtonHelper}>
-            Выбрать другую секцию
-          </span>
+        <div
+          onClick={toggleTemplateModal}
+          className={styles.sectorButtonContainer}>
+          <div className={styles.sectorButtonHelper}>Выбрать другую секцию</div>
+          <div className={styles.sectorButton}>{selectedSector?.title}</div>
         </div>
       )}
       <SchemeTemplateModal
