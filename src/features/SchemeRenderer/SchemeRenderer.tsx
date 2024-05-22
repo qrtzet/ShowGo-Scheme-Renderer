@@ -44,6 +44,7 @@ export const SchemeRenderer = () => {
   const setSelectedSector = useSetAtom(selectedSectorAtom);
   const getTickets = useSetAtom(getTicketsInCartAtom);
   const setSessionSlug = useSetAtom(sessionSlugAtom);
+  const setUser = useSetAtom(userAtom);
 
   const zoomRef = useRef<ReactZoomPanPinchRef | null>(null);
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
@@ -63,7 +64,13 @@ export const SchemeRenderer = () => {
       setSessionSlug(data);
     }, 100);
   });
-  useRNHandler('user', useSetAtom(userAtom));
+
+  useRNHandler('user', data => {
+    setTimeout(async () => {
+      await setUser(data);
+      await getTicketsInCart();
+    }, 100);
+  });
   useRNHandler('urls', useSetAtom(urlsAtom));
   useRNHandler('basketChanged', async ticketsCount => {
     if (ticketsCount !== tickets.length) {

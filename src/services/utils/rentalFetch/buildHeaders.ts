@@ -8,7 +8,7 @@ export const buildHeaders = async ({accessToken}: Data) => {
   )) as URLs | null;
 
   const headers: HttpHeader = {
-    'Country-Code': 'uz' || (urls?.countryCode as 'uz' | 'kg'),
+    'Country-Code': (urls?.key as 'uz' | 'kg') || 'uz',
   };
   headers.accept = '*/*';
   headers['Content-Type'] = 'application/json';

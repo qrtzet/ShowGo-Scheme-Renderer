@@ -1,3 +1,4 @@
+import {isAuthReadyAtom} from '@atoms/auth';
 import {atom} from 'jotai';
 
 import {selectedSectorAtom} from '@atoms/scheme';
@@ -21,8 +22,9 @@ export type SessionOrderScheme = {
 export const sessionOrderAtom = atom<Promise<Session | null>>(async get => {
   try {
     const slug = get(sessionSlugAtom);
+    const isAuthReady = get(isAuthReadyAtom);
 
-    if (slug) {
+    if (slug && isAuthReady) {
       const {payload} = await getSessionOrder({slug});
 
       return payload;
