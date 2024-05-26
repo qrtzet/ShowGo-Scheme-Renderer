@@ -33,7 +33,7 @@
   .arrow {
     position: absolute;
     left: -20px;
-    top: 20%;
+    top: 12px;
     width: 20px;
     height: 60px;
     background-color: #7070702B;
@@ -43,7 +43,6 @@
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
     border-right: .5px solid grey;
-    transform: translateY(-50%);
 
     &::before {
       content: "";

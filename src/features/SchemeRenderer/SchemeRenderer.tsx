@@ -1,3 +1,4 @@
+import {themeAtom} from '@atoms/theme';
 import {useCallback, useEffect, useRef} from 'react';
 import {useAtom, useAtomValue, useSetAtom} from 'jotai';
 import {ReactZoomPanPinchRef} from 'react-zoom-pan-pinch';
@@ -91,9 +92,7 @@ export const SchemeRenderer = () => {
     zoomRef.current?.zoomIn();
   });
 
-  useRNHandler('zoomOut', () => {
-    zoomRef.current?.zoomOut();
-  });
+  useRNHandler('theme', useSetAtom(themeAtom));
 
   useEffect(() => {
     sendMessageToRN('isReady', true);

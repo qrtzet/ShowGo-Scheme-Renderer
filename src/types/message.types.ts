@@ -17,6 +17,7 @@ export type FromNativeActions = {
   basketChanged: number;
   zoomIn: boolean;
   zoomOut: boolean;
+  theme: 'dark' | 'light';
 };
 
 export type FromNativeActionName = keyof FromNativeActions;

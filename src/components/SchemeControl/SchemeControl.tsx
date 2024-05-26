@@ -1,6 +1,9 @@
+import {themeAtom} from '@atoms/theme';
 import {ClickedElementType} from '@features/SchemeRenderer';
+import {colors} from '@utils/const/colors';
 import {generateSeatText} from '@utils/generateSeatText';
 import classNames from 'classnames';
+import {useAtomValue} from 'jotai';
 import {LegacyRef, ReactNode, RefObject, useCallback, useEffect} from 'react';
 import {Tooltip} from 'react-tooltip';
 import {
@@ -28,6 +31,8 @@ export const SchemeControl = ({
   onClick,
   isInModal = false,
 }: SchemeControlProps) => {
+  const theme = useAtomValue(themeAtom);
+
   const clickEventListener = useCallback(
     async (e: MouseEvent) => {
       const targetElement = e.target as SVGElement;
@@ -86,6 +91,9 @@ export const SchemeControl = ({
         onInit={onInit}>
         <TransformComponent
           contentClass={styles.content}
+          wrapperStyle={{
+            backgroundColor: theme === 'dark' ? '#212121' : '#ebebeb',
+          }}
           wrapperClass={classNames(styles.container, {
             [styles.modal]: isInModal,
           })}>
