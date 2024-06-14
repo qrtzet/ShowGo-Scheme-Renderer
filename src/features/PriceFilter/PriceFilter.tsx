@@ -5,8 +5,10 @@ import {
   setSchemeColorsAtom,
   svgContainerAtom,
 } from '@atoms/scheme';
+import {themeAtom} from '@atoms/theme';
 import {colors} from '@utils/const/colors';
 import {priceWithSymbol} from '@utils/const/locale';
+import {getTextColor} from '@utils/getTextColor';
 import {isColorDark} from '@utils/isColorDark';
 import classNames from 'classnames';
 import {useAtom, useAtomValue, useSetAtom} from 'jotai';
@@ -17,6 +19,7 @@ import styles from './PriceFilter.module.scss';
 export const PriceFilter = () => {
   const svgElement = useAtomValue(svgContainerAtom);
   const seatPrices = useAtomValue(seatPricesAtoms);
+  const theme = useAtomValue(themeAtom);
 
   const [selectedSeatPrice, setSelectedSeatPrice] = useAtom(
     selectedSeatPriceAtom,
@@ -69,9 +72,9 @@ export const PriceFilter = () => {
       </div>
       <div onClick={toggle} className={styles.arrow}>
         {isExpended ? (
-          <IoIosArrowForward size={11} color={colors['white-2']} />
+          <IoIosArrowForward size={11} color={getTextColor(theme || 'dark')} />
         ) : (
-          <IoIosArrowBack size={11} color={colors['white-2']} />
+          <IoIosArrowBack size={11} color={getTextColor(theme || 'dark')} />
         )}
       </div>
     </div>

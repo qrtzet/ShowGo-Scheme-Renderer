@@ -6,31 +6,35 @@
 
   .sectorButtonContainer {
     position: absolute;
-    bottom: 132px;
-    right: 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
 
     .sectorButton {
-      padding: 4px 12px;
-      background-color: #1C77DE;
+      padding: 8px 12px;
+      background-color: rgba(17, 76, 146, 0.77);
       border-radius: 8px;
-      font-weight: 600;
+      font-weight: 500;
       color: white;
-      font-size: 18px;
+      font-size: 12px;
+      text-wrap: nowrap;
+      text-align: center;
 
       &:active {
         opacity: .8;
       }
     }
-    .sectorButtonHelper {
-      font-size: 12px;
-      text-wrap: nowrap;
-      color: white;
-    }
   }
 
+  .sectorTitle {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    font-size: 14px;
+    text-align: center;
+  }
 }
 
 

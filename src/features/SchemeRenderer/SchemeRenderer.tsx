@@ -1,4 +1,6 @@
 import {themeAtom} from '@atoms/theme';
+import {colors} from '@utils/const/colors';
+import {getTextColor} from '@utils/getTextColor';
 import {useCallback, useEffect, useRef} from 'react';
 import {useAtom, useAtomValue, useSetAtom} from 'jotai';
 import {ReactZoomPanPinchRef} from 'react-zoom-pan-pinch';
@@ -31,6 +33,7 @@ export type ClickedElementType = 'seat' | 'area' | 'sector';
 
 export const SchemeRenderer = () => {
   const parsedScheme = useAtomValue(parsedSchemeAtom);
+  const theme = useAtomValue(themeAtom);
   const isSchemeLoading = useAtomValue(isSchemeLoadingAtom);
   const sessionOrder = useAtomValue(sessionOrderAtom);
   const selectedSector = useAtomValue(selectedSectorAtom);
@@ -161,8 +164,14 @@ export const SchemeRenderer = () => {
         <div
           onClick={toggleTemplateModal}
           className={styles.sectorButtonContainer}>
-          <div className={styles.sectorButtonHelper}>Выбрать другую секцию</div>
-          <div className={styles.sectorButton}>{selectedSector?.title}</div>
+          <div className={styles.sectorButton}>Выбрать другую секцию</div>
+        </div>
+      )}
+      {selectedSector?.title && (
+        <div
+          style={{color: getTextColor(theme || 'dark')}}
+          className={styles.sectorTitle}>
+          {selectedSector?.title}
         </div>
       )}
       <SchemeTemplateModal
