@@ -1,6 +1,5 @@
 import {themeAtom} from '@atoms/theme';
 import {ClickedElementType} from '@features/SchemeRenderer';
-import {colors} from '@utils/const/colors';
 import {generateSeatText} from '@utils/generateSeatText';
 import classNames from 'classnames';
 import {useAtomValue} from 'jotai';
