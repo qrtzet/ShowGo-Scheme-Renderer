@@ -111,6 +111,7 @@ export const SchemeControl = ({
         variant="light"
         delayShow={1000}
         delayHide={1000}
+        className={styles.tooltip}
         render={({activeAnchor}) => (
           <div className={styles.text}>
             {activeAnchor && generateSeatText(activeAnchor)}

@@ -4,8 +4,15 @@
   background-color: #ebebeb;
 }
 
+.tooltip {
+  max-width: 70%;
+  text-align: center;
+}
+
 .text {
+  font-size: 12px;
   background-color: white;
+  text-wrap: wrap;
 }
 
 .content {

@@ -1,11 +1,13 @@
 import {selectedSectorAtom} from '@atoms/scheme';
 import {sessionOrderAtom} from '@atoms/session';
+import {themeAtom} from '@atoms/theme';
 import {SchemeControl} from '@components/SchemeControl';
 import {ClickedElementType} from '@features/SchemeRenderer';
 import {colors} from '@utils/const/colors';
+import {getTextColor} from '@utils/getTextColor';
 import {setGroupColor, setSchemeColors} from '@utils/setSchemeColors';
 import {useAtomValue, useSetAtom} from 'jotai';
-import {ReactNode, useCallback, useRef} from 'react';
+import {ReactNode, useCallback, useMemo, useRef} from 'react';
 import {IoClose} from 'react-icons/io5';
 import Modal from 'react-modal';
 import {ReactZoomPanPinchRef} from 'react-zoom-pan-pinch';
@@ -18,26 +20,12 @@ export type SchemeTemplateModalProps = {
   scheme: ReactNode;
 };
 
-const modalStyles: Modal.Styles = {
-  content: {
-    background: '#1d2228',
-    border: 'none',
-    top: 50,
-    left: 12,
-    bottom: 50,
-    right: 12,
-    zIndex: 100,
-    display: 'block',
-    borderRadius: 12,
-  },
-  overlay: {background: colors['extra-blur']},
-};
-
 export const SchemeTemplateModal = ({
   isOpen,
   setIsOpen,
   scheme,
 }: SchemeTemplateModalProps) => {
+  const theme = useAtomValue(themeAtom);
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const sessionOrder = useAtomValue(sessionOrderAtom);
   const setSelectedSector = useSetAtom(selectedSectorAtom);
@@ -62,6 +50,25 @@ export const SchemeTemplateModal = ({
       }
     },
     [sessionOrder?.scheme?.sectors, setIsOpen, setSelectedSector],
+  );
+
+  const modalStyles: Modal.Styles = useMemo(
+    () => ({
+      content: {
+        background: theme === 'dark' ? colors.black : colors.white,
+        border: 'none',
+        top: 50,
+        left: 12,
+        bottom: 50,
+        right: 12,
+        zIndex: 100,
+        padding: 12,
+        display: 'block',
+        borderRadius: 12,
+      },
+      overlay: {background: colors['extra-blur']},
+    }),
+    [theme],
   );
 
   const handleContentInit = useCallback(
@@ -96,10 +103,20 @@ export const SchemeTemplateModal = ({
       onRequestClose={handleCloseModal}
       style={modalStyles}>
       <div className={styles.header}>
-        <div className={styles.title}>Выберите сектор</div>
-        <IoClose onClick={handleCloseModal} size={24} />
+        <div
+          className={styles.title}
+          style={{color: getTextColor(theme || 'light')}}>
+          Выберите сектор
+        </div>
+        <IoClose
+          onClick={handleCloseModal}
+          size={24}
+          color={getTextColor(theme || 'light')}
+        />
       </div>
-      <div className={styles.content}>
+      <div
+        className={styles.content}
+        style={{background: theme === 'dark' ? colors.black : colors.white}}>
         <SchemeControl
           isInModal
           onInit={handleContentInit}

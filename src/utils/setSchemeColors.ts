@@ -1,4 +1,6 @@
+import {Theme} from '@atoms/theme';
 import {colors} from '@utils/const/colors';
+import {getTextColor} from '@utils/getTextColor';
 import {isColorDark} from '@utils/isColorDark';
 
 export type SetSchemeColorsType =
@@ -11,9 +13,15 @@ export type SetSchemeColorsType =
 export const setTextsColor = (
   text: SVGElement,
   type: SetSchemeColorsType,
-  color = colors.white,
+  color?: string,
 ) => {
-  text.style.fill = type === 'default' ? color : colors.white;
+  const theme = JSON.parse(localStorage.getItem('theme') || 'light');
+
+  if (!color) {
+    color = getTextColor(theme as Theme);
+  }
+
+  text.style.fill = type === 'default' ? color : getTextColor(theme as Theme);
   text.style.cursor = type === 'disabled' ? 'default' : 'pointer';
 
   if (type === 'disabled') {
@@ -32,6 +40,7 @@ export const setGroupColor = (
 ) => {
   const elements = group.querySelectorAll('.box');
   const text = group.querySelector('.text');
+  const theme = JSON.parse(localStorage.getItem('theme') || 'light');
 
   group.setAttribute('data-color', boxColor || '');
   group.setAttribute('data-price', price || '');
@@ -40,7 +49,7 @@ export const setGroupColor = (
     setTextsColor(
       text,
       type,
-      isColorDark(boxColor || 'black')
+      isColorDark(boxColor || theme === 'dark' ? 'black' : 'white')
         ? colors.white
         : colors['dark-slate-grey'],
     );
