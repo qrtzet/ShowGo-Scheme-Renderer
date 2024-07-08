@@ -17,11 +17,10 @@ export const setTextsColor = (
 ) => {
   const theme = JSON.parse(localStorage.getItem('theme') || 'light');
 
-  if (!color) {
-    color = getTextColor(theme as Theme);
-  }
-
-  text.style.fill = type === 'default' ? color : getTextColor(theme as Theme);
+  text.style.fill =
+    type === 'default'
+      ? color || text.style.fill
+      : getTextColor(theme as Theme);
   text.style.cursor = type === 'disabled' ? 'default' : 'pointer';
 
   if (type === 'disabled') {
@@ -40,7 +39,6 @@ export const setGroupColor = (
 ) => {
   const elements = group.querySelectorAll('.box');
   const text = group.querySelector('.text');
-  const theme = JSON.parse(localStorage.getItem('theme') || 'light');
 
   group.setAttribute('data-color', boxColor || '');
   group.setAttribute('data-price', price || '');
@@ -49,9 +47,7 @@ export const setGroupColor = (
     setTextsColor(
       text,
       type,
-      isColorDark(boxColor || theme === 'dark' ? 'black' : 'white')
-        ? colors.white
-        : colors['dark-slate-grey'],
+      boxColor && isColorDark(boxColor) ? colors.white : colors.black,
     );
   }
 
