@@ -93,11 +93,11 @@ export const setGroupColor = (
         return;
       }
 
-      element.style.fill = 'none';
+      element.style.fill = colors.grey;
       element.style.cursor = 'pointer';
       element.style.stroke = colors.grey;
       element.style.pointerEvents = 'auto';
-      group.setAttribute('data-status', 'not-set-up');
+      group.setAttribute('data-status', 'ordered');
     }
   });
 
