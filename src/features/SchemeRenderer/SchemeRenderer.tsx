@@ -63,6 +63,10 @@ export const SchemeRenderer = () => {
     sendMessageToRN('basketChanged', tickets.length);
   }, [tickets.length]);
 
+  useEffect(() => {
+    sendMessageToRN('isSectorModalChanged', isTemplateOpen);
+  }, [isTemplateOpen]);
+
   useRNHandler('sessionSlug', data => {
     setTimeout(() => {
       setSessionSlug(data);

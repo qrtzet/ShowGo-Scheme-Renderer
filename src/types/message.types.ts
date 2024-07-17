@@ -5,6 +5,7 @@ export type FromWebActions = {
   isReady: boolean;
   basketChanged: number;
   noScheme: boolean;
+  isSectorModalChanged: boolean;
 };
 
 export type FromWebActionName = keyof FromWebActions;

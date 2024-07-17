@@ -55,7 +55,7 @@ export const SchemeTemplateModal = ({
   const modalStyles: Modal.Styles = useMemo(
     () => ({
       content: {
-        background: theme === 'dark' ? colors.black : colors.white,
+        background: theme === 'dark' ? '#19242d' : colors.white,
         border: 'none',
         top: 50,
         left: 12,
