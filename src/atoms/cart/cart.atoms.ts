@@ -1,3 +1,4 @@
+import {TError} from '@type/http.type';
 import {convertTicketRes} from '@utils/convertTicketRes';
 import {atom} from 'jotai';
 import {atomWithImmer} from 'jotai-immer';
@@ -43,15 +44,23 @@ export const addTicketToCartAtom = atom(
         }
       }
     } catch (e) {
-      toast('Нехватка билетов', {
-        type: 'error',
-        position: 'top-center',
-        theme: 'colored',
-        autoClose: 1000,
-        style: {
-          marginTop: 40,
+      toast(
+        (e as TError)?.status === 401
+          ? 'У вас проблемы с авторизацией, попробуйте выйти и авторизоваться снова'
+          : 'Нехватка билетов',
+        {
+          type: 'error',
+          position: 'bottom-center',
+          theme: 'colored',
+          autoClose: 3000,
+          style: {
+            marginBottom: '50%',
+            marginLeft: 12,
+            marginRight: 12,
+            transform: 'translateY(-50%)',
+          },
         },
-      });
+      );
     } finally {
       isFetching = false;
     }
