@@ -109,7 +109,7 @@ export const setSchemeColorsAtom = atom(
       if (
         sessionOrder?.scheme?.sectors?.find(item => item.sectorId === elItem.id)
       ) {
-        setGroupColor(elItem, 'default', 'sector', colors.blue);
+        setGroupColor(elItem, 'default', 'sector');
         return;
       }
 

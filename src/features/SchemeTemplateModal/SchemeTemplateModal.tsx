@@ -86,7 +86,7 @@ export const SchemeTemplateModal = ({
               item => item.sectorId === elItem.id,
             )
           ) {
-            setGroupColor(elItem, 'default', 'sector', colors.blue);
+            setGroupColor(elItem, 'default', 'sector');
             return;
           }
 
