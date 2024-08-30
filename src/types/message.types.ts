@@ -11,8 +11,8 @@ export type FromWebActions = {
 export type FromWebActionName = keyof FromWebActions;
 
 export type FromNativeActions = {
-  user: User;
-  tempUuid: string;
+  user: User | null;
+  tempUuid: string | null;
   urls: URLs;
   sessionSlug: string;
   basketChanged: number;

@@ -1,5 +1,4 @@
 import {themeAtom} from '@atoms/theme';
-import {colors} from '@utils/const/colors';
 import {getTextColor} from '@utils/getTextColor';
 import {useCallback, useEffect, useRef} from 'react';
 import {useAtom, useAtomValue, useSetAtom} from 'jotai';
@@ -76,7 +75,9 @@ export const SchemeRenderer = () => {
   useRNHandler('user', data => {
     setTimeout(async () => {
       await setUser(data);
-      await getTicketsInCart();
+      if (data) {
+        await getTicketsInCart();
+      }
     }, 100);
   });
   useRNHandler('urls', useSetAtom(urlsAtom));
@@ -91,8 +92,11 @@ export const SchemeRenderer = () => {
   });
 
   useRNHandler('tempUuid', async data => {
-    setTempUuid(data);
-    await getTicketsInCart();
+    await setTempUuid(data);
+
+    if (data) {
+      await getTicketsInCart();
+    }
   });
 
   useRNHandler('zoomIn', () => {
