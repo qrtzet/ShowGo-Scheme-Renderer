@@ -12,6 +12,11 @@ export const FullScreenLoader = () => {
       className={styles.container}
       style={{backgroundColor: theme === 'dark' ? '#212121' : '#ebebeb'}}>
       <CubeSpinner color={colors.accent} />
+      <div
+        className={styles.text}
+        style={{color: theme === 'dark' ? colors.white : colors.black}}>
+        Загружается схема...
+      </div>
     </div>
   );
 };
