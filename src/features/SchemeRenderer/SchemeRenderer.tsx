@@ -1,6 +1,6 @@
 import {themeAtom} from '@atoms/theme';
 import {getTextColor} from '@utils/getTextColor';
-import {useCallback, useEffect, useRef} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {useAtom, useAtomValue, useSetAtom} from 'jotai';
 import {ReactZoomPanPinchRef} from 'react-zoom-pan-pinch';
 
@@ -51,6 +51,7 @@ export const SchemeRenderer = () => {
 
   const zoomRef = useRef<ReactZoomPanPinchRef | null>(null);
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
+  const [isLoaderTextHidden, setIsLoaderTextHidden] = useState(false);
 
   useEffect(() => {
     if (svgContainerRef.current) {
@@ -133,7 +134,9 @@ export const SchemeRenderer = () => {
   const handleClick = useCallback(
     async (element: Element, type: ClickedElementType) => {
       if (type === 'seat' || type === 'area') {
+        setIsLoaderTextHidden(true);
         await onSchemePress(element);
+        setIsLoaderTextHidden(false);
         return;
       }
 
@@ -187,7 +190,11 @@ export const SchemeRenderer = () => {
         isOpen={isTemplateOpen}
         setIsOpen={setTemplateOpen}
       />
-      {isSchemeLoading && <FullScreenLoader />}
+      {isSchemeLoading && (
+        <FullScreenLoader
+          text={!isLoaderTextHidden ? 'Загружается схема...' : ''}
+        />
+      )}
     </div>
   );
 };

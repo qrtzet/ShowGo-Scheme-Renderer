@@ -4,7 +4,11 @@ import {useAtomValue} from 'jotai';
 import {CubeSpinner} from 'react-spinners-kit';
 import styles from './FullScreenLoader.module.scss';
 
-export const FullScreenLoader = () => {
+export type FullScreenLoaderProps = {
+  text?: string;
+};
+
+export const FullScreenLoader = ({text}: FullScreenLoaderProps) => {
   const theme = useAtomValue(themeAtom);
 
   return (
@@ -15,7 +19,7 @@ export const FullScreenLoader = () => {
       <div
         className={styles.text}
         style={{color: theme === 'dark' ? colors.white : colors.black}}>
-        Загружается схема...
+        {text}
       </div>
     </div>
   );

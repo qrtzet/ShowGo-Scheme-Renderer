@@ -13,7 +13,7 @@ window.onMessageFromRN = onMessageFromRN;
 export const App = () => {
   return (
     <Provider>
-      <Suspense fallback={<FullScreenLoader />}>
+      <Suspense fallback={<FullScreenLoader text="Загружается схема..." />}>
         <ToastContainer />
         <SchemeRenderer />
       </Suspense>
