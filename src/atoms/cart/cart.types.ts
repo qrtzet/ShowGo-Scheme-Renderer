@@ -9,11 +9,13 @@ export type AddTicketToCartData = {
   eventId: number;
   sessionId: number;
   ticket: AddTicketToCartTicket;
+  isFree?: boolean;
 };
 
 export type TicketInCartEvent = {
   id: number;
   title: string;
+  isFree?: boolean;
 };
 
 export type TicketInCartSession = {

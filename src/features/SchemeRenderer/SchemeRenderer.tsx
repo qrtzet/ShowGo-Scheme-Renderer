@@ -103,6 +103,9 @@ export const SchemeRenderer = () => {
   useRNHandler('zoomIn', () => {
     zoomRef.current?.zoomIn();
   });
+  useRNHandler('zoomOut', () => {
+    zoomRef.current?.zoomOut();
+  });
 
   useRNHandler('theme', useSetAtom(themeAtom));
 

@@ -14,6 +14,7 @@ export type Event = BaseType & {
   description?: string;
   duration?: string;
   isActive: 'ACTIVE' | 'COMPLETED' | 'AWAITING_CLARIFICATION';
+  isFree?: boolean;
 };
 
 export type Session = BaseType & {

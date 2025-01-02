@@ -29,6 +29,31 @@ export const addTicketToCartAtom = atom(
     isFetching = true;
 
     try {
+      const ticketsInCart = get(ticketsInCartAtom);
+      const freeTicket = ticketsInCart.find(ticket => ticket.event.isFree);
+
+      if (
+        (ticketData.isFree && !freeTicket) ||
+        (freeTicket && !ticketData.isFree)
+      ) {
+        toast(
+          'Нельзя добавить бесплатные билеты вместе с платными. Оформите их отдельно',
+          {
+            type: 'error',
+            position: 'bottom-center',
+            theme: 'colored',
+            autoClose: 3000,
+            style: {
+              marginBottom: '50%',
+              marginLeft: 12,
+              marginRight: 12,
+              transform: 'translateY(-50%)',
+            },
+          },
+        );
+        return;
+      }
+
       const {payload} = await addTicket(ticketData);
 
       if (payload?.id) {

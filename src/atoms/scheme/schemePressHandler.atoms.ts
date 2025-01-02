@@ -10,6 +10,7 @@ import {
 import {
   Area,
   SeatScheme,
+  sessionAtom,
   sessionOrderAtom,
   sessionOrderSchemesAtom,
 } from '@atoms/session';
@@ -20,6 +21,7 @@ export const schemePressHandlerAtom = atom(
     try {
       set(isSchemeLoadingAtom, true);
       const sessionOrder = await get(sessionOrderAtom);
+      const session = await get(sessionAtom);
       const orderSchemes = await get(sessionOrderSchemesAtom);
       const ticketsInCart = get(ticketsInCartAtom);
 
@@ -45,6 +47,7 @@ export const schemePressHandlerAtom = atom(
             type,
             id: seat.id,
           },
+          isFree: session?.event?.isFree,
           eventId: sessionOrder.event?.id!,
           sessionId: sessionOrder.id,
         });

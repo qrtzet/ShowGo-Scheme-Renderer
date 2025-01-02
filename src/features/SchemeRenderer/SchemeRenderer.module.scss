@@ -6,7 +6,7 @@
 
   .sectorButtonContainer {
     position: absolute;
-    top: 100px;
+    top: 40px;
     left: 50%;
     transform: translateX(-50%);
 
@@ -28,8 +28,9 @@
 
   .sectorTitle {
     position: absolute;
-    top: 70px;
+    top: 12px;
     left: 50%;
+    font-weight: 600;
     transform: translateX(-50%);
     width: 80%;
     font-size: 14px;
