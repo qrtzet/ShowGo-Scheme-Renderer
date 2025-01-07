@@ -57,9 +57,9 @@ export const SchemeTemplateModal = ({
       content: {
         background: theme === 'dark' ? '#19242d' : colors.white,
         border: 'none',
-        top: 50,
+        top: 160,
         left: 12,
-        bottom: 50,
+        bottom: 100,
         right: 12,
         zIndex: 100,
         padding: 12,
@@ -123,6 +123,7 @@ export const SchemeTemplateModal = ({
           svgContainerRef={svgContainerRef}
           scheme={scheme}
           onClick={handleClick}
+          heightClass={styles.height}
         />
       </div>
     </Modal>

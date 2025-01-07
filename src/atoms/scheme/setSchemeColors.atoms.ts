@@ -1,15 +1,9 @@
 import {ticketsInCartAtom} from '@atoms/cart';
 import {selectedSeatPriceAtom} from '@atoms/scheme/seatPrices.atoms';
-import {
-  sessionAtom,
-  sessionOrderAtom,
-  sessionOrderSchemesAtom,
-} from '@atoms/session';
+import {sessionOrderAtom, sessionOrderSchemesAtom} from '@atoms/session';
+import {themeAtom} from '@atoms/theme';
 import {colors} from '@utils/const/colors';
-import {
-  getAreasByTitles,
-  getSpecificSchemeSeats,
-} from '@utils/getSpecificSchemeSeats';
+import {getSpecificSchemeSeats} from '@utils/getSpecificSchemeSeats';
 import {
   setGroupColor,
   setGroupsColor,
@@ -31,6 +25,7 @@ export const setSchemeColorsAtom = atom(
     const sessionOrder = await get(sessionOrderAtom);
     const selectedSeatPrice = get(selectedSeatPriceAtom);
     const ticketsInCart = get(ticketsInCartAtom);
+    const theme = get(themeAtom);
 
     const [seatsScheme, areasScheme, orderItems] = [
       orderSchemes.seats,
@@ -137,6 +132,20 @@ export const setSchemeColorsAtom = atom(
 
       setGroupColor(areaElement, 'default', 'seat', areaScheme?.color);
     });
+
+    const rowsGroup = svgElement.querySelector('#rows');
+
+    if (rowsGroup) {
+      const elements = rowsGroup.querySelectorAll('*');
+
+      elements.forEach(element => {
+        if (element.tagName === 'path') {
+          element.setAttribute('stroke', theme === 'dark' ? '#fff' : '#000');
+        } else if (element.tagName === 'text' || element.tagName === 'tspan') {
+          element.setAttribute('fill', theme === 'dark' ? '#fff' : '#000');
+        }
+      });
+    }
 
     set(isSchemeLoadingAtom, false);
   },

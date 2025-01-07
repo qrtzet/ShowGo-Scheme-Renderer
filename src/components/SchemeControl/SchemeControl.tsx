@@ -20,6 +20,7 @@ export type SchemeControlProps = {
   scheme: ReactNode;
   onClick: (element: SVGElement, type: ClickedElementType) => void;
   isInModal?: boolean;
+  heightClass?: string;
 };
 
 export const SchemeControl = ({
@@ -28,6 +29,7 @@ export const SchemeControl = ({
   svgContainerRef,
   scheme,
   onClick,
+  heightClass,
   isInModal = false,
 }: SchemeControlProps) => {
   const theme = useAtomValue(themeAtom);
@@ -89,16 +91,16 @@ export const SchemeControl = ({
         centerOnInit
         onInit={onInit}>
         <TransformComponent
-          contentClass={styles.content}
+          contentClass={classNames(styles.content, heightClass)}
           wrapperStyle={{
             backgroundColor: theme === 'dark' ? '#212121' : '#ebebeb',
           }}
-          wrapperClass={classNames(styles.container, {
+          wrapperClass={classNames(styles.container, heightClass, {
             [styles.modal]: isInModal,
           })}>
           <div
             ref={svgContainerRef}
-            className={classNames(styles.svgContainer, {
+            className={classNames(styles.svgContainer, heightClass, {
               [styles.modal]: isInModal,
             })}>
             {scheme}
