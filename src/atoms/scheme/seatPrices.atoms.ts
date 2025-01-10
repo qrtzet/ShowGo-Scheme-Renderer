@@ -31,10 +31,11 @@ export const seatPricesAtoms = atom(async (get): Promise<SeatPrice[]> => {
 
     const seatsWithPrices = sessionOrder.scheme.seats.map(
       (seat): SeatPrice | null => {
-        if (
-          !uniqueColors.has(seat.color) &&
-          !sessionOrderScheme?.orderItems?.has(seat.htmlId)
-        ) {
+        const isEnabled = !sessionOrder.scheme?.sectors?.length
+          ? !sessionOrderScheme?.orderItems?.has(seat.htmlId)
+          : true;
+
+        if (!uniqueColors.has(seat.color) && isEnabled) {
           uniqueColors.add(seat.color);
 
           return {color: seat.color, price: seat.price};
