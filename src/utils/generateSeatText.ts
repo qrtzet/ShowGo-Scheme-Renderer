@@ -12,12 +12,20 @@ export const generateSeatText = (element: HTMLElement) => {
   const seat = element.getAttribute('data-seat');
   const status = element.getAttribute('data-status');
   const price = element.getAttribute('data-price');
+  const type = element.getAttribute('data-type');
+  const count = element.getAttribute('data-count');
 
-  const tooltipText = status
-    ? seatStatus[status as keyof typeof seatStatus]
-    : `Сектор: ${sector}, Ряд/Стол: ${row}, Место: ${seat}${
-        price ? `, Цена: ${priceWithSymbol(+price)}` : ''
-      }`;
+  if (status) {
+    return seatStatus[status as keyof typeof seatStatus];
+  }
 
-  return tooltipText;
+  if (type === 'table') {
+    return `Сектор: ${sector}, Стол: ${row}, Количество мест: ${count}, ${
+      price ? `, Цена: ${priceWithSymbol(+price)}` : ''
+    }`;
+  }
+
+  return `Сектор: ${sector}, Ряд/Стол: ${row}, Место: ${seat}${
+    price ? `, Цена: ${priceWithSymbol(+price)}` : ''
+  }`;
 };
