@@ -1,26 +1,22 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {Suspense} from 'react';
+import {Provider} from 'jotai';
+import {ToastContainer} from 'react-toastify';
 
-function App() {
+import {SchemeRenderer} from '@features/SchemeRenderer';
+import {FullScreenLoader} from '@components/FullScreenLoader';
+import {onMessageFromRN} from '@utils/message/RNMessageHandler';
+import 'react-toastify/dist/ReactToastify.css';
+
+// @ts-ignore
+window.onMessageFromRN = onMessageFromRN;
+
+export const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Provider>
+      <Suspense fallback={<FullScreenLoader text="Загружается схема..." />}>
+        <ToastContainer />
+        <SchemeRenderer />
+      </Suspense>
+    </Provider>
   );
-}
-
-export default App;
+};

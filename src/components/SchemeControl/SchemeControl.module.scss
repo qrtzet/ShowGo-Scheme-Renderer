@@ -1,0 +1,35 @@
+.container {
+  width: 100vw;
+  height: 100vh;
+  background-color: #bebebe;
+}
+
+.tooltip {
+  max-width: 70%;
+  text-align: center;
+}
+
+.text {
+  font-size: 12px;
+  background-color: white;
+  text-wrap: wrap;
+}
+
+.content {
+  width: 100vw;
+  height: 100vh;
+  padding: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.svgContainer {
+  width: 100vw;
+  height: 100vh;
+}
+
+.modal {
+  width: calc(100vw - 48px);
+  height: calc(100vh - 140px);
+}

@@ -1,0 +1,21 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  color: white;
+  margin-bottom: 12px;
+
+  .title {
+    font-size: 18px;
+  }
+}
+
+.content {
+  border-radius: 12px;
+  width: 100%;
+  color: white;
+}
+
+.height {
+  height: calc(100vh - 320px);
+  width: calc(100vw - 48px);
+}
