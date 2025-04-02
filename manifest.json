@@ -1,6 +1,6 @@
 {
-  "short_name": "showgo-scheme-renderer",
-  "name": "ShowGo Scheme Renderer",
+  "short_name": "React App",
+  "name": "Create React App Sample",
   "icons": [
     {
       "src": "favicon.ico",
