@@ -46,7 +46,7 @@ export const SchemeRenderer = () => {
   const setTempUuid = useSetAtom(tempUuidAtom);
   const setSelectedSector = useSetAtom(selectedSectorAtom);
   const getTickets = useSetAtom(getTicketsInCartAtom);
-  const setSessionSlug = useSetAtom(sessionSlugAtom);
+  const [sessionSlug, setSessionSlug] = useAtom(sessionSlugAtom);
   const setUser = useSetAtom(userAtom);
 
   const zoomRef = useRef<ReactZoomPanPinchRef | null>(null);
@@ -144,6 +144,11 @@ export const SchemeRenderer = () => {
       }
 
       if (type === 'sector') {
+        if(sessionSlug === '1834-mirbek-atabekov') {
+          alert('Билетов нет')
+          return
+        }
+
         const clickedSector = sessionOrder?.scheme?.sectors?.find(
           item => item.sectorId === element.id,
         );
@@ -153,7 +158,7 @@ export const SchemeRenderer = () => {
         }
       }
     },
-    [onSchemePress, sessionOrder?.scheme?.sectors, setSelectedSector],
+    [onSchemePress, sessionOrder?.scheme?.sectors, sessionSlug, setSelectedSector],
   );
 
   const toggleTemplateModal = useCallback(() => {
