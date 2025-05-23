@@ -1,5 +1,5 @@
-import {selectedSectorAtom} from '@atoms/scheme';
-import {sessionOrderAtom} from '@atoms/session';
+import {selectedSeatPriceAtom, selectedSectorAtom} from '@atoms/scheme';
+import {sessionOrderAtom, sessionOrderSchemesAtom} from '@atoms/session';
 import {themeAtom} from '@atoms/theme';
 import {SchemeControl} from '@components/SchemeControl';
 import {ClickedElementType} from '@features/SchemeRenderer';
@@ -13,6 +13,7 @@ import Modal from 'react-modal';
 import {ReactZoomPanPinchRef} from 'react-zoom-pan-pinch';
 
 import styles from './SchemeTemplateModal.module.scss';
+import {schemePressHandlerAtom} from "@atoms/scheme/schemePressHandler.atoms";
 
 export type SchemeTemplateModalProps = {
   isOpen: boolean;
@@ -28,14 +29,18 @@ export const SchemeTemplateModal = ({
   const theme = useAtomValue(themeAtom);
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const sessionOrder = useAtomValue(sessionOrderAtom);
+  const orderSchemes = useAtomValue(sessionOrderSchemesAtom)
+  const selectedSeatPrice = useAtomValue(selectedSeatPriceAtom)
   const setSelectedSector = useSetAtom(selectedSectorAtom);
+  const onSchemePress = useSetAtom(schemePressHandlerAtom);
+
 
   const handleCloseModal = useCallback(() => {
     setIsOpen(false);
   }, [setIsOpen]);
 
   const handleClick = useCallback(
-    (element: Element, type: ClickedElementType) => {
+   async (element: Element, type: ClickedElementType) => {
       if (type === 'sector') {
         const clickedSector = sessionOrder?.scheme?.sectors?.find(
           item => item.sectorId === element.id,
@@ -48,8 +53,13 @@ export const SchemeTemplateModal = ({
           }, 500);
         }
       }
+
+      if(type === 'area') {
+        await onSchemePress(element);
+        return;
+      }
     },
-    [sessionOrder?.scheme?.sectors, setIsOpen, setSelectedSector],
+    [onSchemePress, sessionOrder?.scheme?.sectors, setIsOpen, setSelectedSector],
   );
 
   const modalStyles: Modal.Styles = useMemo(
@@ -92,9 +102,31 @@ export const SchemeTemplateModal = ({
 
           setGroupColor(elItem, 'disabled', 'sector');
         });
+
+        const areasElements =
+          svgElement?.querySelector('#areas')?.querySelectorAll('[id^="area_"]') ||
+          [];
+
+        areasElements.forEach((areaElement, index) => {
+          const areaScheme = orderSchemes.areas.get(areaElement.id);
+
+          if (selectedSeatPrice) {
+            setGroupColor(
+              areaElement,
+              areaScheme?.color === selectedSeatPrice.color
+                ? 'default'
+                : 'without-color',
+              'seat',
+              areaScheme?.color,
+            );
+            return;
+          }
+
+          setGroupColor(areaElement, 'default', 'seat', areaScheme?.color);
+        });
       }
     },
-    [sessionOrder?.scheme?.sectors],
+    [orderSchemes.areas, selectedSeatPrice, sessionOrder?.scheme?.sectors],
   );
 
   return (

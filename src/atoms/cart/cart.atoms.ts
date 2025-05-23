@@ -5,7 +5,6 @@ import {atomWithImmer} from 'jotai-immer';
 
 import {setSchemeColorsAtom, svgContainerAtom} from '@atoms/scheme';
 import {addTicket, getTickets, removeTicket} from '@services/cart';
-import {toast} from 'react-toastify';
 
 import {AddTicketToCartData, TicketInCart} from './cart.types';
 import {
@@ -14,6 +13,7 @@ import {
   restartReservationTimer,
   startReservationTimerAtom,
 } from './reservationTimer.atoms';
+import toast from "react-hot-toast";
 
 let isFetching = false;
 
@@ -36,20 +36,8 @@ export const addTicketToCartAtom = atom(
         (ticketData.isFree && notFreeTicket) ||
         (!notFreeTicket && notFreeTicket !== undefined && !ticketData.isFree)
       ) {
-        toast(
+        toast.error(
           'Нельзя добавить бесплатные билеты вместе с платными. Оформите их отдельно',
-          {
-            type: 'error',
-            position: 'bottom-center',
-            theme: 'colored',
-            autoClose: 3000,
-            style: {
-              marginBottom: '50%',
-              marginLeft: 12,
-              marginRight: 12,
-              transform: 'translateY(-50%)',
-            },
-          },
         );
         return;
       }
@@ -69,22 +57,11 @@ export const addTicketToCartAtom = atom(
         }
       }
     } catch (e) {
-      toast(
+      toast.error(
         (e as TError)?.status === 401
           ? 'У вас проблемы с авторизацией, попробуйте выйти и авторизоваться снова'
           : 'Нехватка билетов',
-        {
-          type: 'error',
-          position: 'bottom-center',
-          theme: 'colored',
-          autoClose: 3000,
-          style: {
-            marginBottom: '50%',
-            marginLeft: 12,
-            marginRight: 12,
-            transform: 'translateY(-50%)',
-          },
-        },
+
       );
     } finally {
       isFetching = false;

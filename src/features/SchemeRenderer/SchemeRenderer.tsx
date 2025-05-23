@@ -144,10 +144,6 @@ export const SchemeRenderer = () => {
       }
 
       if (type === 'sector') {
-        if(sessionSlug === '1834-mirbek-atabekov') {
-          alert('Билетов нет')
-          return
-        }
 
         const clickedSector = sessionOrder?.scheme?.sectors?.find(
           item => item.sectorId === element.id,
@@ -158,7 +154,7 @@ export const SchemeRenderer = () => {
         }
       }
     },
-    [onSchemePress, sessionOrder?.scheme?.sectors, sessionSlug, setSelectedSector],
+    [onSchemePress, sessionOrder?.scheme?.sectors, setSelectedSector],
   );
 
   const toggleTemplateModal = useCallback(() => {
