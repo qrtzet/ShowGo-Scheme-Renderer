@@ -7,3 +7,6 @@
 body {
     background-color: #ebebeb;
 }
+.title {
+    pointer-events: none!important;
+}
