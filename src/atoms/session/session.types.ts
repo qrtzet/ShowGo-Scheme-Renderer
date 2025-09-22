@@ -17,6 +17,32 @@ export type Event = BaseType & {
   isFree?: boolean;
 };
 
+export type DiscountMethodName =
+  | 'payment_method_event'
+  | 'event_ticket_quantity';
+
+export type DiscountMethod = {
+  id: number;
+  name: DiscountMethodName;
+  requiredFields: string[];
+};
+
+export type DiscountPayload = {
+  eventId: number;
+  paymentMethodCode: string;
+};
+
+export type Discount = {
+  id: number;
+  countryId: number;
+  discountId: number;
+  discountType: 'FIXED' | 'PERCENT';
+  discountAmount: number;
+  method: DiscountMethod;
+  payload: DiscountPayload;
+  quantity: number;
+};
+
 export type Session = BaseType & {
   dateTime: string;
   event?: Event;
@@ -30,6 +56,10 @@ export type Session = BaseType & {
   language: string | null;
   otherSessions?: OtherSession[];
   hall?: Hall;
+  maxTicketsPerCustomer: number;
+  status: string;
+  discounts: Discount[];
+  outerSessionId?: number;
 };
 
 export type OtherSession = {

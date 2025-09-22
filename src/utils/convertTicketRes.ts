@@ -9,8 +9,9 @@ export const convertTicketRes = (ticket: TicketInCartRes) => {
     title: ticket.title,
     ticket: {
       type: ticket.ticketTypeId ? 'entry' : 'seat',
-      id: ticket.ticketSeatId ? ticket.ticketSeatId : ticket.ticketTypeId!,
+      id: ticket.ticketSeatId ? ticket?.ticketSeatId : ticket?.ticketTypeId!,
     },
+    outerId: ticket?.outerId
   };
 
   return newTicket;

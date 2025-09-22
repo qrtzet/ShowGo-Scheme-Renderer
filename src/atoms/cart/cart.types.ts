@@ -1,4 +1,4 @@
-export type AddTicketToCartTicketType = 'entry' | 'seat' | 'area';
+export type AddTicketToCartTicketType = 'entry' | 'seat' | 'area' | 'ESBO-area';
 
 export type AddTicketToCartTicket = {
   type: AddTicketToCartTicketType;
@@ -10,6 +10,7 @@ export type AddTicketToCartData = {
   sessionId: number;
   ticket: AddTicketToCartTicket;
   isFree?: boolean;
+  isESBO?: boolean
 };
 
 export type TicketInCartEvent = {
@@ -34,6 +35,7 @@ export type TicketInCart = {
    * @example 'Сектор: E, Ряд: 4, Место: 32'
    */
   title: string;
+  outerId?: number;
 };
 
 export type TicketInCartRes = Omit<TicketInCart, 'ticket'> & {

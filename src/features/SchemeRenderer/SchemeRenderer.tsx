@@ -15,7 +15,7 @@ import {
 } from '@atoms/scheme';
 import {schemePressHandlerAtom} from '@atoms/scheme/schemePressHandler.atoms';
 import {parsedTemplateSchemeAtom} from '@atoms/schemeTemplate';
-import {sessionOrderAtom, sessionSlugAtom} from '@atoms/session';
+import {sessionAtom, sessionOrderAtom, sessionSlugAtom} from '@atoms/session';
 import {urlsAtom} from '@atoms/urls';
 
 import {FullScreenLoader} from '@components/FullScreenLoader';
@@ -27,6 +27,8 @@ import {sendMessageToRN} from '@utils/message/sendMessageToRN';
 import {PriceFilter} from '../PriceFilter';
 import {SchemeTemplateModal} from '../SchemeTemplateModal';
 import styles from './SchemeRenderer.module.scss';
+import {ESBOAreaClickAtom, ESBOSeatClickAtom, ESBOSeatsAtom, setESBOSeatsAtom} from "@atoms/ESBO";
+import {getESBOSeatElementKey} from "@utils/getESBOSeatKey";
 
 export type ClickedElementType = 'seat' | 'area' | 'sector';
 
@@ -35,18 +37,23 @@ export const SchemeRenderer = () => {
   const theme = useAtomValue(themeAtom);
   const isSchemeLoading = useAtomValue(isSchemeLoadingAtom);
   const sessionOrder = useAtomValue(sessionOrderAtom);
+  const session = useAtomValue(sessionAtom)
   const selectedSector = useAtomValue(selectedSectorAtom);
   const parsedTemplateScheme = useAtomValue(parsedTemplateSchemeAtom);
   const tickets = useAtomValue(ticketsInCartAtom);
   const [isTemplateOpen, setTemplateOpen] = useAtom(isTemplateModalOpenAtom);
 
   const setSchemeColors = useSetAtom(setSchemeColorsAtom);
+  const setESBOSeats = useSetAtom(setESBOSeatsAtom);
   const onSchemePress = useSetAtom(schemePressHandlerAtom);
+  const setSeats = useSetAtom(ESBOSeatsAtom)
+  const onESBOSeatPress = useSetAtom(ESBOSeatClickAtom);
+  const onESBOAreaClickPress = useSetAtom(ESBOAreaClickAtom);
   const getTicketsInCart = useSetAtom(getTicketsInCartAtom);
   const setTempUuid = useSetAtom(tempUuidAtom);
   const setSelectedSector = useSetAtom(selectedSectorAtom);
   const getTickets = useSetAtom(getTicketsInCartAtom);
-  const [sessionSlug, setSessionSlug] = useAtom(sessionSlugAtom);
+  const [, setSessionSlug] = useAtom(sessionSlugAtom);
   const setUser = useSetAtom(userAtom);
 
   const zoomRef = useRef<ReactZoomPanPinchRef | null>(null);
@@ -87,7 +94,12 @@ export const SchemeRenderer = () => {
       await getTickets();
 
       if (svgContainerRef?.current) {
-        await setSchemeColors(svgContainerRef?.current);
+        if(session?.outerSessionId) {
+          await setSeats()
+          await setESBOSeats(svgContainerRef?.current);
+        } else {
+          await setSchemeColors(svgContainerRef?.current);
+        }
       }
     }
   });
@@ -128,14 +140,42 @@ export const SchemeRenderer = () => {
       svgContainerRef.current = svgContainer;
 
       if (svgContainer) {
+
+        if(session?.outerSessionId) {
+          await setESBOSeats(svgContainer)
+
+          return
+        }
+
         await setSchemeColors(svgContainer);
       }
     },
-    [setSchemeColors],
+    [session, setESBOSeats, setSchemeColors],
   );
 
   const handleClick = useCallback(
-    async (element: Element, type: ClickedElementType) => {
+    async (element: SVGElement, type: ClickedElementType) => {
+      const seatKey = getESBOSeatElementKey(element);
+
+
+      if(session?.outerSessionId) {
+        if (seatKey && type === 'seat') {
+          setIsLoaderTextHidden(true);
+          await onESBOSeatPress(seatKey);
+          setIsLoaderTextHidden(false);
+
+        }
+
+        if (type === 'area' && element.dataset.sector) {
+          setIsLoaderTextHidden(true);
+          await onESBOAreaClickPress(element.dataset.sector);
+          setIsLoaderTextHidden(false);
+
+        }
+
+        return;
+      }
+
       if (type === 'seat' || type === 'area') {
         setIsLoaderTextHidden(true);
         await onSchemePress(element);
@@ -154,7 +194,7 @@ export const SchemeRenderer = () => {
         }
       }
     },
-    [onSchemePress, sessionOrder?.scheme?.sectors, setSelectedSector],
+    [onESBOAreaClickPress, onESBOSeatPress, onSchemePress, session?.outerSessionId, sessionOrder?.scheme?.sectors, setSelectedSector],
   );
 
   const toggleTemplateModal = useCallback(() => {
@@ -174,7 +214,7 @@ export const SchemeRenderer = () => {
         scheme={parsedScheme || parsedTemplateScheme}
         onClick={handleClick}
       />
-      <PriceFilter />
+      {!session?.outerSessionId && <PriceFilter/>}
       {selectedSector && sessionOrder?.scheme?.sectors?.length && (
         <div
           onClick={toggleTemplateModal}

@@ -10,6 +10,7 @@ export const ticketBodyType: Record<AddTicketToCartTicketType, string> = {
   entry: 'ticket_type_id',
   seat: 'ticket_seat_id',
   area: 'ticket_area_id',
+  'ESBO-area': 'sector_id'
 };
 
 export type AddTicketResType = {
@@ -20,12 +21,23 @@ export const addTicket = async ({
   eventId,
   sessionId,
   ticket,
+  isESBO
 }: AddTicketToCartData): Promise<AddTicketResType> => {
-  const body = {
-    event_id: eventId,
-    session_id: sessionId,
-    [ticketBodyType[ticket.type]]: ticket.id,
-  };
+  let body;
+
+  if(isESBO) {
+    body = {
+      event_id: eventId,
+      session_id: sessionId,
+      ticket_id: ticket.id,
+    };
+  } else {
+    body = {
+      event_id: eventId,
+      session_id: sessionId,
+      [ticketBodyType[ticket.type]]: ticket.id,
+    };
+  }
 
   const response = await rentalFetchAuthorized('order/item', {
     method: 'POST',

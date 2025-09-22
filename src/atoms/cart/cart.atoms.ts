@@ -14,6 +14,8 @@ import {
   startReservationTimerAtom,
 } from './reservationTimer.atoms';
 import toast from "react-hot-toast";
+import {sessionAtom} from "@atoms/session";
+import {setESBOSeatsAtom} from "@atoms/ESBO";
 
 let isFetching = false;
 
@@ -29,6 +31,7 @@ export const addTicketToCartAtom = atom(
     isFetching = true;
 
     try {
+      const session = await get(sessionAtom)
       const ticketsInCart = get(ticketsInCartAtom);
       const notFreeTicket = ticketsInCart.find(ticket => !ticket.event.isFree);
 
@@ -53,7 +56,7 @@ export const addTicketToCartAtom = atom(
         const svgContainer = get(svgContainerAtom);
 
         if (svgContainer) {
-          await set(setSchemeColorsAtom, svgContainer);
+          await set(session?.outerSessionId ? setESBOSeatsAtom : setSchemeColorsAtom, svgContainer);
         }
       }
     } catch (e) {
@@ -71,19 +74,29 @@ export const addTicketToCartAtom = atom(
 
 export const removeTicketFromCartAtom = atom(
   null,
-  async (get, set, seatId: number) => {
+  async (get, set, {isESBO, seatId}: {seatId: number, isESBO?: boolean}) => {
     try {
+      const session = await get(sessionAtom)
+
       const removedTicket = get(ticketsInCartAtom).find(
         ticket => ticket.ticket.id === seatId,
       );
 
-      if (removedTicket) {
-        await removeTicket(removedTicket.id);
+      if (removedTicket  || isESBO) {
+        await removeTicket(isESBO ? seatId : removedTicket!.id);
 
         set(ticketsInCartAtom, draft => {
-          const newData = draft.filter(
-            ticket => removedTicket.id !== ticket.id,
-          );
+          let newData
+
+          if(!isESBO) {
+            newData = draft.filter(
+              ticket => removedTicket!.id !== ticket.id,
+            );
+          } else {
+            newData = draft.filter(
+              ticket => seatId !== ticket.outerId,
+            );
+          }
 
           if (!newData.length) {
             set(clearReservationTimerAtom);
@@ -96,7 +109,7 @@ export const removeTicketFromCartAtom = atom(
       const svgContainer = get(svgContainerAtom);
 
       if (svgContainer) {
-        await set(setSchemeColorsAtom, svgContainer);
+        await set(session?.outerSessionId ? setESBOSeatsAtom : setSchemeColorsAtom, svgContainer);
       }
     } finally {
     }

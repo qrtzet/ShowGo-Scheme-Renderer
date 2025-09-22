@@ -38,7 +38,7 @@ export const schemePressHandlerAtom = atom(
         );
 
         if (isAlreadyExist?.id && type === 'seat') {
-          await set(removeTicketFromCartAtom, seat.id);
+          await set(removeTicketFromCartAtom, {seatId: seat.id});
           return;
         }
 

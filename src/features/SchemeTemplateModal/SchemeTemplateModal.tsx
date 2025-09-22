@@ -1,5 +1,5 @@
 import {selectedSeatPriceAtom, selectedSectorAtom} from '@atoms/scheme';
-import {sessionOrderAtom, sessionOrderSchemesAtom} from '@atoms/session';
+import {sessionAtom, sessionOrderAtom, sessionOrderSchemesAtom} from '@atoms/session';
 import {themeAtom} from '@atoms/theme';
 import {SchemeControl} from '@components/SchemeControl';
 import {ClickedElementType} from '@features/SchemeRenderer';
@@ -14,6 +14,7 @@ import {ReactZoomPanPinchRef} from 'react-zoom-pan-pinch';
 
 import styles from './SchemeTemplateModal.module.scss';
 import {schemePressHandlerAtom} from "@atoms/scheme/schemePressHandler.atoms";
+import {ESBOAreaClickAtom} from "@atoms/ESBO";
 
 export type SchemeTemplateModalProps = {
   isOpen: boolean;
@@ -31,8 +32,11 @@ export const SchemeTemplateModal = ({
   const sessionOrder = useAtomValue(sessionOrderAtom);
   const orderSchemes = useAtomValue(sessionOrderSchemesAtom)
   const selectedSeatPrice = useAtomValue(selectedSeatPriceAtom)
+  const session = useAtomValue(sessionAtom)
+
   const setSelectedSector = useSetAtom(selectedSectorAtom);
   const onSchemePress = useSetAtom(schemePressHandlerAtom);
+  const onESBOAreaClickPress = useSetAtom(ESBOAreaClickAtom);
 
 
   const handleCloseModal = useCallback(() => {
@@ -40,7 +44,7 @@ export const SchemeTemplateModal = ({
   }, [setIsOpen]);
 
   const handleClick = useCallback(
-   async (element: Element, type: ClickedElementType) => {
+   async (element: SVGElement, type: ClickedElementType) => {
       if (type === 'sector') {
         const clickedSector = sessionOrder?.scheme?.sectors?.find(
           item => item.sectorId === element.id,
@@ -55,11 +59,16 @@ export const SchemeTemplateModal = ({
       }
 
       if(type === 'area') {
+
+        if (session?.outerSessionId && element.dataset.sector) {
+          await onESBOAreaClickPress(element.dataset.sector);
+        }
+
         await onSchemePress(element);
         return;
       }
     },
-    [onSchemePress, sessionOrder?.scheme?.sectors, setIsOpen, setSelectedSector],
+    [onESBOAreaClickPress, onSchemePress, session?.outerSessionId, sessionOrder?.scheme?.sectors, setIsOpen, setSelectedSector],
   );
 
   const modalStyles: Modal.Styles = useMemo(

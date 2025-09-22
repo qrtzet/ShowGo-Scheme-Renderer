@@ -1,3 +1,5 @@
+import {getESBOSeatElementKey} from "@utils/getESBOSeatKey";
+
 export const getSpecificSchemeSeats = (svgElement: Element, ids: string[]) => {
   const selectedSeats = svgElement.querySelectorAll('[id^="seat_"]');
 
@@ -20,4 +22,22 @@ export const getAreasByTitles = (svgElement: Element, titles: string[]) => {
   });
 
   return areas;
+};
+
+
+export const getSpecificOSSchemeSeats = (
+  svgElement: Element,
+  seats: string[],
+) => {
+  const seatsSet = new Set(seats);
+
+  const selectedSeats = svgElement.querySelectorAll('[id^="seat_"]');
+
+  const specificSeats = Array.from(selectedSeats).filter(element => {
+    const seatKey = getESBOSeatElementKey(element);
+
+    return seatKey && seatsSet.has(seatKey);
+  });
+
+  return specificSeats;
 };
