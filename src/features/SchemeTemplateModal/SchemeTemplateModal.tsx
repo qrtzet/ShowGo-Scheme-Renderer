@@ -45,7 +45,7 @@ export const SchemeTemplateModal = ({
 
   const handleClick = useCallback(
    async (element: SVGElement, type: ClickedElementType) => {
-      if (type === 'sector') {
+      if (type === 'sector'  && element.dataset.status !== 'ordered') {
         const clickedSector = sessionOrder?.scheme?.sectors?.find(
           item => item.sectorId === element.id,
         );
@@ -100,10 +100,11 @@ export const SchemeTemplateModal = ({
         const sectorElements = svgElement?.querySelectorAll('[id^="sector_"]');
 
         Array.from(sectorElements || []).forEach(elItem => {
+          const existSector = sessionOrder?.scheme?.sectors?.find(item => item.sectorId === elItem.id)
+          const existSeat = sessionOrder?.scheme?.seats.find(seat =>  seat.schemeSectorId === existSector?.id)
+
           if (
-            sessionOrder?.scheme?.sectors?.find(
-              item => item.sectorId === elItem.id,
-            )
+            existSector && existSeat
           ) {
             setGroupColor(elItem, 'default', 'sector');
             return;
@@ -135,7 +136,7 @@ export const SchemeTemplateModal = ({
         });
       }
     },
-    [orderSchemes.areas, selectedSeatPrice, sessionOrder?.scheme?.sectors],
+    [orderSchemes.areas, selectedSeatPrice, sessionOrder?.scheme?.seats, sessionOrder?.scheme?.sectors],
   );
 
   return (

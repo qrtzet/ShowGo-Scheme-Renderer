@@ -101,8 +101,11 @@ export const setSchemeColorsAtom = atom(
       ?.querySelectorAll('[id^="sector_"]');
 
     Array.from(sectorElements || []).forEach(elItem => {
+      const existSector = sessionOrder?.scheme?.sectors?.find(item => item.sectorId === elItem.id)
+      const existSeat = sessionOrder?.scheme?.seats.find(seat =>  seat.schemeSectorId === existSector?.id)
+
       if (
-        sessionOrder?.scheme?.sectors?.find(item => item.sectorId === elItem.id)
+        existSector && existSeat
       ) {
         setGroupColor(elItem, 'default', 'sector');
         return;

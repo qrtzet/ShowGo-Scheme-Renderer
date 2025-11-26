@@ -60,7 +60,7 @@ export const setGroupColor = (
       }
 
       if (type === 'disabled' || type === 'booked') {
-        element.style.fill = boxColor || colors.grey;
+        element.style.fill = boxColor || colors.blur;
         element.style.stroke = colors.grey;
         element.style.cursor = 'default';
         element.style.pointerEvents = 'auto';
@@ -94,6 +94,7 @@ export const setGroupColor = (
       element.style.stroke = colors.grey;
       element.style.pointerEvents = 'auto';
       group.setAttribute('data-status', 'ordered');
+      group.setAttribute('data-tooltip-id', 'seat-tooltip');
     }
   });
 

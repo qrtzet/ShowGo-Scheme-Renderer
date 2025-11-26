@@ -189,7 +189,7 @@ export const SchemeRenderer = () => {
           item => item.sectorId === element.id,
         );
 
-        if (clickedSector) {
+        if (clickedSector && element.dataset.status !== 'ordered') {
           setSelectedSector(clickedSector);
         }
       }
