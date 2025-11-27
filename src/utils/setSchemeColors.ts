@@ -60,7 +60,7 @@ export const setGroupColor = (
       }
 
       if (type === 'disabled' || type === 'booked') {
-        element.style.fill = boxColor || colors.blur;
+        element.style.fill = boxColor || colors.grey;
         element.style.stroke = colors.grey;
         element.style.cursor = 'default';
         element.style.pointerEvents = 'auto';
