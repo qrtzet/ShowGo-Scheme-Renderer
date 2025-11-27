@@ -61,7 +61,7 @@ export const addTicketToCartAtom = atom(
       }
     } catch (e) {
       toast.error(
-        (e as TError)?.status === 401
+        (e as unknown as any)?.response?.payload?.message ? (e as unknown as any)?.response?.payload?.message  :   (e as TError)?.status === 401
           ? 'У вас проблемы с авторизацией, попробуйте выйти и авторизоваться снова'
           : 'Нехватка билетов',
 
