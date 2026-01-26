@@ -114,7 +114,7 @@ export const SchemeControl = ({
         delayHide={0}
         className={styles.tooltip}
         render={({activeAnchor}) => (
-          !activeAnchor?.id.startsWith('area_') ?  <div className={styles.text}>
+          activeAnchor?.id.startsWith('seat_') ? <div className={styles.text}>
             {activeAnchor && generateSeatText(activeAnchor)}
           </div> : null
         )}
