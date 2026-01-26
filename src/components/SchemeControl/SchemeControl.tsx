@@ -24,14 +24,14 @@ export type SchemeControlProps = {
 };
 
 export const SchemeControl = ({
-  zoomRef,
-  onInit,
-  svgContainerRef,
-  scheme,
-  onClick,
-  heightClass,
-  isInModal = false,
-}: SchemeControlProps) => {
+                                zoomRef,
+                                onInit,
+                                svgContainerRef,
+                                scheme,
+                                onClick,
+                                heightClass,
+                                isInModal = false,
+                              }: SchemeControlProps) => {
   const theme = useAtomValue(themeAtom);
 
   const clickEventListener = useCallback(
@@ -111,12 +111,12 @@ export const SchemeControl = ({
         id="seat-tooltip"
         variant="light"
         delayShow={1000}
-        delayHide={1000}
+        delayHide={0}
         className={styles.tooltip}
         render={({activeAnchor}) => (
-          <div className={styles.text}>
+          !activeAnchor?.id.startsWith('area_') ?  <div className={styles.text}>
             {activeAnchor && generateSeatText(activeAnchor)}
-          </div>
+          </div> : null
         )}
       />
     </>
