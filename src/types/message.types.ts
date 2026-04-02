@@ -6,6 +6,7 @@ export type FromWebActions = {
   basketChanged: number;
   noScheme: boolean;
   isSectorModalChanged: boolean;
+  isSectorOpen: boolean;
 };
 
 export type FromWebActionName = keyof FromWebActions;
@@ -19,6 +20,7 @@ export type FromNativeActions = {
   zoomIn: boolean;
   zoomOut: boolean;
   theme: 'dark' | 'light';
+  isSectorOpen: boolean;
 };
 
 export type FromNativeActionName = keyof FromNativeActions;

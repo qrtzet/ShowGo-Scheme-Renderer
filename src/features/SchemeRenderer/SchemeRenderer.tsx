@@ -74,6 +74,10 @@ export const SchemeRenderer = () => {
     sendMessageToRN('isSectorModalChanged', isTemplateOpen);
   }, [isTemplateOpen]);
 
+  useEffect(() => {
+    sendMessageToRN('isSectorOpen', !!selectedSector)
+  }, [selectedSector])
+
   useRNHandler('sessionSlug', data => {
     setTimeout(() => {
       setSessionSlug(data);
@@ -120,6 +124,12 @@ export const SchemeRenderer = () => {
   });
 
   useRNHandler('theme', useSetAtom(themeAtom));
+
+  useRNHandler('isSectorOpen', (data) => {
+    if(!data){
+      setSelectedSector(null)
+    }
+  });
 
   useEffect(() => {
     sendMessageToRN('isReady', true);
