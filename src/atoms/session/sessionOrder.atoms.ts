@@ -82,7 +82,12 @@ export const sessionOrderSchemesAtom = atom<Promise<SessionOrderScheme>>(
       (selectedSector
         ? orderItems.filter(order => order.schemeSectorId === selectedSector.id)
         : orderItems
-      )?.map(orderItem => [orderItem.htmlId, orderItem]),
+      )?.map(orderItem => [
+        orderItem.schemeSectorId
+          ? `${orderItem.schemeSectorId}-${orderItem.htmlId}`
+          : orderItem.htmlId,
+        orderItem,
+      ]),
     );
 
     return {

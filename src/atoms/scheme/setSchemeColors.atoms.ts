@@ -1,6 +1,6 @@
 import {ticketsInCartAtom} from '@atoms/cart';
 import {selectedSeatPriceAtom} from '@atoms/scheme/seatPrices.atoms';
-import {sessionOrderAtom, sessionOrderSchemesAtom} from '@atoms/session';
+import {sessionOrderAtom, sessionOrderItemsAtom, sessionOrderSchemesAtom} from '@atoms/session';
 import {themeAtom} from '@atoms/theme';
 import {colors} from '@utils/const/colors';
 import {getSpecificSchemeSeats} from '@utils/getSpecificSchemeSeats';
@@ -24,6 +24,7 @@ export const setSchemeColorsAtom = atom(
     const orderSchemes = await get(sessionOrderSchemesAtom);
     const sessionOrder = await get(sessionOrderAtom);
     const selectedSeatPrice = get(selectedSeatPriceAtom);
+    const orderItemsR = await get(sessionOrderItemsAtom);
     const ticketsInCart = get(ticketsInCartAtom);
     const theme = get(themeAtom);
 
@@ -35,58 +36,59 @@ export const setSchemeColorsAtom = atom(
 
     setSchemeColors(svgElement, 'without-color');
 
-    const orderedSeatsIDs = Array.from(orderItems.keys());
-    const orderedSeats = getSpecificSchemeSeats(svgElement, orderedSeatsIDs);
-    const myOrderedSeatsIDs =
-      ticketsInCart.reduce((acc, currentTicket) => {
-        const seatScheme = Array.from(seatsScheme.values()).find(
-          item => item.id === currentTicket.ticket.id,
-        );
+    const myOrderedSeatsIDs = ticketsInCart.reduce((acc, currentTicket) => {
+      const seatScheme = Array.from(seatsScheme.values()).find(
+        item => item.id === currentTicket.ticket.id,
+      );
+      if (seatScheme) acc.push(seatScheme.htmlId);
+      return acc;
+    }, [] as string[]);
 
-        if (seatScheme) {
-          acc.push(seatScheme.htmlId);
-        }
+    const myOrderedSeats = getSpecificSchemeSeats(svgElement, myOrderedSeatsIDs);
 
-        return acc;
-      }, [] as string[]) || [];
+    // Получаем все элементы кресел, которые есть в схеме
+    const allSeatsIDs = Array.from(seatsScheme.keys());
+    const allSeatsElements = getSpecificSchemeSeats(svgElement, allSeatsIDs);
 
-    const myOrderedSeats = getSpecificSchemeSeats(
-      svgElement,
-      myOrderedSeatsIDs,
-    );
+    const orderedSeats: Element[] = [];
+    const availableSeats: Element[] = [];
 
-    const seatsIDs = Array.from(seatsScheme.keys());
-
-    const seatsElements = getSpecificSchemeSeats(
-      svgElement,
-      seatsIDs.filter(id => !orderedSeatsIDs.includes(id)),
-    );
-
-    seatsElements.forEach(seatElement => {
+    allSeatsElements.forEach(seatElement => {
       const seatScheme = seatsScheme.get(seatElement.id);
+      if (!seatScheme) return;
 
-      if (selectedSeatPrice) {
-        setGroupColor(
-          seatElement,
-          selectedSeatPrice.color === seatScheme?.color
-            ? 'default'
-            : 'without-color',
-          'seat',
-          seatScheme?.color,
-          String(seatScheme?.price),
-        );
+      const key = seatScheme.schemeSectorId 
+        ? `${seatScheme.schemeSectorId}-${seatScheme.htmlId}` 
+        : seatScheme.htmlId;
+
+      const isOrdered = orderItems.has(key);
+      const isMyOrder = myOrderedSeatsIDs.includes(seatScheme.htmlId);
+
+      if (isMyOrder) {
+        // Пропускаем, так как покрасим отдельно через setGroupsColor(myOrderedSeats)
         return;
       }
 
+      if (isOrdered) {
+        orderedSeats.push(seatElement);
+      } else {
+        availableSeats.push(seatElement);
+      }
+    });
+
+    // Красим свободные места
+    availableSeats.forEach(seatElement => {
+      const seatScheme = seatsScheme.get(seatElement.id);
       setGroupColor(
         seatElement,
-        'default',
+        selectedSeatPrice && selectedSeatPrice.color !== seatScheme?.color ? 'without-color' : 'default',
         'seat',
         seatScheme?.color,
         String(seatScheme?.price),
       );
     });
 
+    // Красим занятые места
     setGroupsColor(
       orderedSeats,
       'disabled',
@@ -94,6 +96,7 @@ export const setSchemeColorsAtom = atom(
       selectedSeatPrice ? colors.blur : undefined,
     );
 
+    // Красим мои места (в корзине)
     setGroupsColor(myOrderedSeats, 'default', 'seat', colors.red);
 
     const sectorElements = svgElement
@@ -102,13 +105,18 @@ export const setSchemeColorsAtom = atom(
 
     Array.from(sectorElements || []).forEach(elItem => {
       const existSector = sessionOrder?.scheme?.sectors?.find(item => item.sectorId === elItem.id)
-      const existSeat = sessionOrder?.scheme?.seats.find(seat =>  seat.schemeSectorId === existSector?.id)
+      if (existSector) {
+        const allSeatsInSector = sessionOrder?.scheme?.seats?.filter(seat => seat.schemeSectorId === existSector.id) || [];
+        
+        const hasAvailableSeats = allSeatsInSector.some(seat => {
+          const key = seat.schemeSectorId ? `${seat.schemeSectorId}-${seat.htmlId}` : seat.htmlId;
+          return !orderItems.has(key);
+        });
 
-      if (
-        existSector && existSeat
-      ) {
+        if (hasAvailableSeats) {
         setGroupColor(elItem, 'default', 'sector');
-        return;
+          return;
+        }
       }
 
       setGroupColor(elItem, 'disabled', 'sector');

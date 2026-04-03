@@ -106,8 +106,17 @@ export const SchemeTemplateModal = ({
           if (
             existSector && existSeat
           ) {
-            setGroupColor(elItem, 'default', 'sector');
-            return;
+            const allSeatsInSector = sessionOrder?.scheme?.seats?.filter(seat => seat.schemeSectorId === existSector.id) || [];
+            
+            const hasAvailableSeats = allSeatsInSector.some(seat => {
+              const key = seat.schemeSectorId ? `${seat.schemeSectorId}-${seat.htmlId}` : seat.htmlId;
+              return !orderSchemes.orderItems.has(key);
+            });
+
+            if (hasAvailableSeats) {
+              setGroupColor(elItem, 'default', 'sector');
+              return;
+            }
           }
 
           setGroupColor(elItem, 'disabled', 'sector');
@@ -136,7 +145,7 @@ export const SchemeTemplateModal = ({
         });
       }
     },
-    [orderSchemes.areas, selectedSeatPrice, sessionOrder?.scheme?.seats, sessionOrder?.scheme?.sectors],
+    [orderSchemes, selectedSeatPrice, sessionOrder?.scheme?.seats, sessionOrder?.scheme?.sectors],
   );
 
   return (
