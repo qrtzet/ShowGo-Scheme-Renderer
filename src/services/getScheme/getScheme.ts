@@ -5,7 +5,7 @@ export const getScheme = async (path: string) => {
     localStorage.getItem('urls') || 'null',
   );
 
-  const response = await fetch(URLs?.apiURL + `/storage/schemes/${path}`);
+  const response = await fetch((URLs?.schemeURL || URLs?.apiURL) + `/storage/schemes/${path}`);
 
   return response.text();
 };

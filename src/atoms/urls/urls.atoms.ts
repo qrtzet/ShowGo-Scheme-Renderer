@@ -3,6 +3,7 @@ import {atomWithStorage} from 'jotai/utils';
 export type URLs = {
   apiURL: string;
   websiteURL: string;
+  schemeURL?: string;
   countryCode: 'KG' | 'UZ';
   lang: string;
   key: 'kg' | 'uz';
