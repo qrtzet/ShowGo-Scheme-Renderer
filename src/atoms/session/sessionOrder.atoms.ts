@@ -17,6 +17,7 @@ export type SessionOrderScheme = {
   seats: OrderSeatsScheme;
   areas: OrderAreasScheme;
   orderItems: OrderItems;
+  orderItemsCount: Map<string, number>;
 };
 
 export const sessionOrderAtom = atom<Promise<Session | null>>(async get => {
@@ -78,11 +79,18 @@ export const sessionOrderSchemesAtom = atom<Promise<SessionOrderScheme>>(
       seatsScheme?.map(seat => [seat.htmlId, seat]),
     );
 
+    const orderItemsCountMap = new Map<string, number>();
+
+    orderItems.forEach(orderItem => {
+      const key = orderItem.schemeSectorId
+        ? `${orderItem.schemeSectorId}-${orderItem.htmlId}`
+        : orderItem.htmlId;
+      
+      orderItemsCountMap.set(key, (orderItemsCountMap.get(key) || 0) + 1);
+    });
+
     const orderItemsMap = new Map(
-      (selectedSector
-        ? orderItems.filter(order => order.schemeSectorId === selectedSector.id)
-        : orderItems
-      )?.map(orderItem => [
+      orderItems?.map(orderItem => [
         orderItem.schemeSectorId
           ? `${orderItem.schemeSectorId}-${orderItem.htmlId}`
           : orderItem.htmlId,
@@ -94,6 +102,7 @@ export const sessionOrderSchemesAtom = atom<Promise<SessionOrderScheme>>(
       seats: seatsSchemeMap,
       areas: areasSchemeMap,
       orderItems: orderItemsMap,
+      orderItemsCount: orderItemsCountMap,
     };
   },
 );

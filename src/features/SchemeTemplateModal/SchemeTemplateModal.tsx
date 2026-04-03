@@ -98,15 +98,28 @@ export const SchemeTemplateModal = ({
         setSchemeColors(svgElement, 'default');
 
         const sectorElements = svgElement?.querySelectorAll('[id^="sector_"]');
+        const areasElements = svgElement?.querySelectorAll('[id^="area_"]');
+        const allZones = [...Array.from(sectorElements || []), ...Array.from(areasElements || [])];
 
-        Array.from(sectorElements || []).forEach(elItem => {
-          const existSector = sessionOrder?.scheme?.sectors?.find(item => item.sectorId === elItem.id)
-          const existSeat = sessionOrder?.scheme?.seats.find(seat =>  seat.schemeSectorId === existSector?.id)
+        allZones.forEach(elItem => {
+          const isArea = elItem.id.startsWith('area_');
 
-          if (
-            existSector && existSeat
-          ) {
-            const allSeatsInSector = sessionOrder?.scheme?.seats?.filter(seat => seat.schemeSectorId === existSector.id) || [];
+          if (isArea) {
+            const areaScheme = orderSchemes.areas.get(elItem.id);
+            if (!areaScheme) return;
+
+            const soldCount = orderSchemes.orderItemsCount.get(elItem.id) || 0;
+            const isFull = areaScheme.quantity !== null && soldCount >= areaScheme.quantity;
+
+            if (!isFull) {
+              setGroupColor(elItem, 'default', 'sector', areaScheme.color);
+              return;
+            }
+            
+            setGroupColor(elItem, 'disabled', 'sector', colors.grey);
+          } else {
+            const existSector = sessionOrder?.scheme?.sectors?.find(item => item.sectorId === elItem.id);
+            const allSeatsInSector = sessionOrder?.scheme?.seats?.filter(seat => seat.schemeSectorId === existSector?.id) || [];
             
             const hasAvailableSeats = allSeatsInSector.some(seat => {
               const key = seat.schemeSectorId ? `${seat.schemeSectorId}-${seat.htmlId}` : seat.htmlId;
@@ -117,35 +130,13 @@ export const SchemeTemplateModal = ({
               setGroupColor(elItem, 'default', 'sector');
               return;
             }
+            
+            setGroupColor(elItem, 'disabled', 'sector');
           }
-
-          setGroupColor(elItem, 'disabled', 'sector');
-        });
-
-        const areasElements =
-          svgElement?.querySelector('#areas')?.querySelectorAll('[id^="area_"]') ||
-          [];
-
-        areasElements.forEach((areaElement, index) => {
-          const areaScheme = orderSchemes.areas.get(areaElement.id);
-
-          if (selectedSeatPrice) {
-            setGroupColor(
-              areaElement,
-              areaScheme?.color === selectedSeatPrice.color
-                ? 'default'
-                : 'without-color',
-              'seat',
-              areaScheme?.color,
-            );
-            return;
-          }
-
-          setGroupColor(areaElement, 'default', 'seat', areaScheme?.color);
         });
       }
     },
-    [orderSchemes, selectedSeatPrice, sessionOrder?.scheme?.seats, sessionOrder?.scheme?.sectors],
+    [colors.grey, orderSchemes.areas, orderSchemes.orderItems, orderSchemes.orderItemsCount, sessionOrder?.scheme?.seats, sessionOrder?.scheme?.sectors],
   );
 
   return (

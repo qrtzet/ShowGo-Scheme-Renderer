@@ -11,6 +11,7 @@ import {
   TransformComponent,
   TransformWrapper,
 } from 'react-zoom-pan-pinch';
+
 import styles from './SchemeControl.module.scss';
 
 export type SchemeControlProps = {
@@ -24,14 +25,14 @@ export type SchemeControlProps = {
 };
 
 export const SchemeControl = ({
-                                zoomRef,
-                                onInit,
-                                svgContainerRef,
-                                scheme,
-                                onClick,
-                                heightClass,
-                                isInModal = false,
-                              }: SchemeControlProps) => {
+  zoomRef,
+  onInit,
+  svgContainerRef,
+  scheme,
+  onClick,
+  heightClass,
+  isInModal = false,
+}: SchemeControlProps) => {
   const theme = useAtomValue(themeAtom);
 
   const clickEventListener = useCallback(
@@ -113,11 +114,17 @@ export const SchemeControl = ({
         delayShow={1000}
         delayHide={0}
         className={styles.tooltip}
-        render={({activeAnchor}) => (
-          activeAnchor?.id.startsWith('seat_') ? <div className={styles.text}>
-            {activeAnchor && generateSeatText(activeAnchor)}
-          </div> : null
-        )}
+        render={({activeAnchor}) => {
+          if (activeAnchor?.id.startsWith('seat_')) {
+            return (
+              <div className={styles.text}>
+                {activeAnchor && generateSeatText(activeAnchor)}
+              </div>
+            );
+          }
+
+          return null;
+        }}
       />
     </>
   );

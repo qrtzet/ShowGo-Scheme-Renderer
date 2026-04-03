@@ -28,10 +28,11 @@ export const setSchemeColorsAtom = atom(
     const ticketsInCart = get(ticketsInCartAtom);
     const theme = get(themeAtom);
 
-    const [seatsScheme, areasScheme, orderItems] = [
+    const [seatsScheme, areasScheme, orderItems, orderItemsCount] = [
       orderSchemes.seats,
       orderSchemes.areas,
       orderSchemes.orderItems,
+      orderSchemes.orderItemsCount,
     ];
 
     setSchemeColors(svgElement, 'without-color');
@@ -126,22 +127,35 @@ export const setSchemeColorsAtom = atom(
       svgElement?.querySelector('#areas')?.querySelectorAll('[id^="area_"]') ||
       [];
 
-    areasElements.forEach((areaElement, index) => {
+    areasElements.forEach((areaElement) => {
       const areaScheme = areasScheme.get(areaElement.id);
+      if (!areaScheme) return;
+
+      const soldCount = orderItemsCount.get(areaElement.id) || 0;
+      const inCartCount = ticketsInCart.filter(ticket => ticket.ticket.id === areaScheme.id).length;
+      
+      const leftCount = areaScheme.quantity !== null 
+        ? Math.max(0, areaScheme.quantity - soldCount - inCartCount) 
+        : null;
+        
+      const isFull = leftCount === 0;
+
+      if (isFull) {
+        setGroupColor(areaElement, 'disabled', 'sector', colors.grey);
+        return;
+      }
 
       if (selectedSeatPrice) {
         setGroupColor(
           areaElement,
-          areaScheme?.color === selectedSeatPrice.color
-            ? 'default'
-            : 'without-color',
-          'seat',
-          areaScheme?.color,
+          areaScheme.color === selectedSeatPrice.color ? 'default' : 'without-color',
+          'sector',
+          areaScheme.color,
         );
         return;
       }
 
-      setGroupColor(areaElement, 'default', 'seat', areaScheme?.color);
+      setGroupColor(areaElement, 'default', 'sector', areaScheme.color);
     });
 
     const rowsGroup = svgElement.querySelector('#rows');
