@@ -19,10 +19,16 @@ import {sessionAtom, sessionOrderAtom, sessionSlugAtom} from '@atoms/session';
 import {urlsAtom} from '@atoms/urls';
 
 import {FullScreenLoader} from '@components/FullScreenLoader';
+import {PlacePendingLoader} from '@components/PlacePendingLoader';
 import {SchemeControl} from '@components/SchemeControl';
 
 import {useRNHandler} from '@utils/message/RNMessageHandler';
 import {sendMessageToRN} from '@utils/message/sendMessageToRN';
+import {lockPlaceClick, unlockPlaceClick} from '@utils/placeClickLock';
+import {
+  getElementPlace,
+  getPlaceDiscountLines,
+} from '@utils/seatDiscounts';
 
 import {PriceFilter} from '../PriceFilter';
 import {SchemeTemplateModal} from '../SchemeTemplateModal';
@@ -58,13 +64,45 @@ export const SchemeRenderer = () => {
 
   const zoomRef = useRef<ReactZoomPanPinchRef | null>(null);
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
-  const [isLoaderTextHidden, setIsLoaderTextHidden] = useState(false);
+  /** Идёт добавление места в корзину, а не загрузка схемы. */
+  const [isPlacePending, setIsPlacePending] = useState(false);
 
   useEffect(() => {
     if (svgContainerRef.current) {
       void setSchemeColors(svgContainerRef.current);
     }
   }, [setSchemeColors, parsedScheme]);
+
+  /**
+   * Подсказку к зоне привязываем только там, где есть что сказать про
+   * скидку: своего текста у зоны нет, и пустая плашка никому не нужна.
+   * У брендов без скидок не навешивается вообще ничего.
+   */
+  useEffect(() => {
+    const container = svgContainerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    const areas = container
+      .querySelector('#areas')
+      ?.querySelectorAll('[id^="area_"]');
+
+    areas?.forEach(element => {
+      const area = session?.scheme?.areas?.find(
+        item => item.schemeArea?.htmlId === element.id,
+      );
+      const hasDiscount =
+        !!area && getPlaceDiscountLines({areaId: area.id}, session).length > 0;
+
+      if (hasDiscount) {
+        element.setAttribute('data-tooltip-id', 'seat-tooltip');
+      } else {
+        element.removeAttribute('data-tooltip-id');
+      }
+    });
+  }, [parsedScheme, session]);
 
   useEffect(() => {
     sendMessageToRN('basketChanged', tickets.length);
@@ -163,44 +201,82 @@ export const SchemeRenderer = () => {
     [session, setESBOSeats, setSchemeColors],
   );
 
+  /**
+   * Скидки в подсказку у места или зоны. Теперь они действуют на
+   * перечисленные места и зоны, а не на весь заказ, — до выбора иначе
+   * неоткуда узнать, что именно это место дешевле.
+   */
+  const getPlaceLines = useCallback(
+    (element: Element) => {
+      if (element.id.startsWith('area_')) {
+        const area = session?.scheme?.areas?.find(
+          item => item.schemeArea?.htmlId === element.id,
+        );
+
+        return area
+          ? getPlaceDiscountLines({areaId: area.id}, session)
+          : [];
+      }
+
+      return getPlaceDiscountLines(getElementPlace(element), session);
+    },
+    [session],
+  );
+
   const handleClick = useCallback(
     async (element: SVGElement, type: ClickedElementType) => {
       const seatKey = getESBOSeatElementKey(element);
 
+      /**
+       * Тап по месту или зоне уходит запросом в корзину. Пока он идёт,
+       * повторные тапы отсекаем: иначе второй либо займёт ещё одно место,
+       * либо снимет только что занятое.
+       */
+      const isPlace = type === 'seat' || type === 'area';
 
-      if(session?.outerSessionId) {
-        if (seatKey && type === 'seat') {
-          setIsLoaderTextHidden(true);
-          await onESBOSeatPress(seatKey);
-          setIsLoaderTextHidden(false);
-
-        }
-
-        if (type === 'area' && element.dataset.sector) {
-          setIsLoaderTextHidden(true);
-          await onESBOAreaClickPress(element.dataset.sector);
-          setIsLoaderTextHidden(false);
-
-        }
-
+      if (isPlace && !lockPlaceClick()) {
         return;
       }
 
-      if (type === 'seat' || type === 'area') {
-        setIsLoaderTextHidden(true);
-        await onSchemePress(element);
-        setIsLoaderTextHidden(false);
-        return;
-      }
+      try {
+        if (session?.outerSessionId) {
+          if (seatKey && type === 'seat') {
+            setIsPlacePending(true);
+            await onESBOSeatPress(seatKey);
+          }
 
-      if (type === 'sector') {
+          if (type === 'area' && element.dataset.sector) {
+            setIsPlacePending(true);
+            await onESBOAreaClickPress(element.dataset.sector);
+          }
 
-        const clickedSector = sessionOrder?.scheme?.sectors?.find(
-          item => item.sectorId === element.id,
-        );
+          return;
+        }
 
-        if (clickedSector && element.dataset.status !== 'ordered') {
-          setSelectedSector(clickedSector);
+        if (isPlace) {
+          setIsPlacePending(true);
+          await onSchemePress(element);
+
+          return;
+        }
+
+        if (type === 'sector') {
+          const clickedSector = sessionOrder?.scheme?.sectors?.find(
+            item => item.sectorId === element.id,
+          );
+
+          if (clickedSector && element.dataset.status !== 'ordered') {
+            setSelectedSector(clickedSector);
+          }
+        }
+      } finally {
+        /**
+         * И при отказе тоже: иначе схема осталась бы заблокированной, а
+         * индикатор висел бы до перезагрузки вебвью.
+         */
+        if (isPlace) {
+          unlockPlaceClick();
+          setIsPlacePending(false);
         }
       }
     },
@@ -223,6 +299,7 @@ export const SchemeRenderer = () => {
         svgContainerRef={svgContainerRef}
         scheme={parsedScheme || parsedTemplateScheme}
         onClick={handleClick}
+        placeExtraLines={getPlaceLines}
       />
       {!session?.outerSessionId && <PriceFilter/>}
       {selectedSector && sessionOrder?.scheme?.sectors?.length && (
@@ -244,10 +321,14 @@ export const SchemeRenderer = () => {
         isOpen={isTemplateOpen}
         setIsOpen={setTemplateOpen}
       />
-      {isSchemeLoading && (
-        <FullScreenLoader
-          text={!isLoaderTextHidden ? 'Загружается схема...' : ''}
-        />
+      {/**
+       * Схему гасим только на её собственной загрузке. Добавление места —
+       * это короткий запрос, и закрывать из-за него весь зал незачем:
+       * человеку надо видеть, куда он тапнул.
+       */}
+      {isPlacePending && <PlacePendingLoader />}
+      {isSchemeLoading && !isPlacePending && (
+        <FullScreenLoader text="Загружается схема..." />
       )}
     </div>
   );

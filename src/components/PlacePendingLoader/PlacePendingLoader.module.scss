@@ -1,0 +1,27 @@
+/**
+ * Схему не закрываем: человек должен видеть, куда он только что тапнул.
+ * Поэтому плашка узкая, снизу и не перехватывает нажатия — повторные тапы
+ * отсекает замок, а не прозрачный слой поверх схемы.
+ */
+.container {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 8px 16px;
+  border-radius: 20px;
+
+  pointer-events: none;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 20%);
+}
+
+.text {
+  font-size: 13px;
+  white-space: nowrap;
+}

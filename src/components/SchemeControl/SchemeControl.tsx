@@ -22,6 +22,11 @@ export type SchemeControlProps = {
   onClick: (element: SVGElement, type: ClickedElementType) => void;
   isInModal?: boolean;
   heightClass?: string;
+  /**
+   * Что добавить в подсказку к месту или зоне — у нас это скидки на них.
+   * Знание о скидках живёт в SchemeRenderer, у которого есть сеанс.
+   */
+  placeExtraLines?: (element: Element) => string[];
 };
 
 export const SchemeControl = ({
@@ -32,6 +37,7 @@ export const SchemeControl = ({
   onClick,
   heightClass,
   isInModal = false,
+  placeExtraLines,
 }: SchemeControlProps) => {
   const theme = useAtomValue(themeAtom);
 
@@ -48,7 +54,14 @@ export const SchemeControl = ({
         'g[id^="sector_"][data-title]',
       );
 
-      if (sectorElement && onClick) {
+      // Сектор с data-status="ordered" (нет свободных мест) — не кликабелен
+      if (
+        sectorElement &&
+        onClick &&
+        !['ordered', 'booked'].includes(
+          sectorElement.getAttribute('data-status') || '',
+        )
+      ) {
         onClick(sectorElement as SVGElement, 'sector');
       }
 
@@ -115,15 +128,34 @@ export const SchemeControl = ({
         delayHide={0}
         className={styles.tooltip}
         render={({activeAnchor}) => {
-          if (activeAnchor?.id.startsWith('seat_')) {
-            return (
-              <div className={styles.text}>
-                {activeAnchor && generateSeatText(activeAnchor)}
-              </div>
-            );
+          const isSeat = !!activeAnchor?.id.startsWith('seat_');
+          const isArea = !!activeAnchor?.id.startsWith('area_');
+
+          if (!activeAnchor || (!isSeat && !isArea)) {
+            return null;
           }
 
-          return null;
+          /** У выкупленного места скидка уже ничего не значит. */
+          const lines = activeAnchor.getAttribute('data-status')
+            ? []
+            : placeExtraLines?.(activeAnchor) || [];
+
+          /**
+           * У зоны своего текста нет. Подсказку к ней привязывают только при
+           * наличии скидки, но если данные успели обновиться — молчим.
+           */
+          if (isArea && !lines.length) {
+            return null;
+          }
+
+          return (
+            <div className={styles.text}>
+              {isSeat && generateSeatText(activeAnchor)}
+              {lines.map(line => (
+                <div key={line}>{line}</div>
+              ))}
+            </div>
+          );
         }}
       />
     </>

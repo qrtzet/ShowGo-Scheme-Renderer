@@ -32,6 +32,24 @@ export type DiscountPayload = {
   paymentMethodCode: string;
 };
 
+/**
+ * Место или зона, на которые действует скидка. `null` в любом поле значит
+ * «любое»; пустой список — скидка на всё.
+ *
+ * Ключи в обоих написаниях: старый API мы прогоняем через камелизацию, а
+ * адаптер v2 отдаёт скидки как пришли, в snake_case.
+ */
+export type DiscountScope = {
+  id: number;
+  sessionId?: number | null;
+  session_id?: number | null;
+  ticketAreaId?: number | null;
+  ticket_area_id?: number | null;
+  sector: string | null;
+  row: string | null;
+  seat: string | null;
+};
+
 export type Discount = {
   id: number;
   countryId: number;
@@ -40,7 +58,8 @@ export type Discount = {
   discountAmount: number;
   method: DiscountMethod;
   payload: DiscountPayload;
-  quantity: number;
+  quantity: number | null;
+  scopes?: DiscountScope[] | null;
 };
 
 export type Session = BaseType & {
