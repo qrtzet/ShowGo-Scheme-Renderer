@@ -1,3 +1,4 @@
+import {PaymentMethodBrief} from '@atoms/paymentMethods';
 import {Discount, DiscountScope, Session} from '@atoms/session';
 import {priceWithSymbol} from '@utils/const/locale';
 
@@ -65,24 +66,45 @@ const amountText = (discount: Discount) =>
 const capitalize = (value: string) =>
   value.charAt(0).toUpperCase() + value.slice(1);
 
-const discountLine = (discount: Discount): string | null => {
+/**
+ * Читаемое имя способа оплаты. Каталог приложение присылает сообщением; если
+ * оно ещё не пришло или метода там нет — чистим код от технического суффикса,
+ * чтобы не показывать человеку `demir_webhook`. Правило то же, что в
+ * приложении, иначе подписи на схеме и на экране события разойдутся.
+ */
+const paymentMethodName = (code: string, payments?: PaymentMethodBrief[]) => {
+  const title = payments?.find(method => method.code === code)?.title?.trim();
+
+  if (title) {
+    return title;
+  }
+
+  return capitalize(
+    code.replace(/_(webhook|classic)$/i, '').replace(/_/g, ' '),
+  );
+};
+
+const discountLine = (
+  discount: Discount,
+  payments?: PaymentMethodBrief[],
+): string | null => {
   if (discount.method?.name === 'event_ticket_quantity') {
-    const from = discount.quantity && discount.quantity > 1
-      ? ` от ${discount.quantity} билетов`
-      : '';
+    const from =
+      discount.quantity && discount.quantity > 1
+        ? ` от ${discount.quantity} билетов`
+        : '';
 
     return `Скидка ${amountText(discount)}${from}`;
   }
 
   if (discount.method?.name === 'payment_method_event') {
-    /**
-     * Названия способов оплаты в рендерер не приезжают — показываем код,
-     * как он задан в админке.
-     */
     const code = discount.payload?.paymentMethodCode;
 
     return code
-      ? `Скидка ${amountText(discount)} при оплате через ${capitalize(code)}`
+      ? `Скидка ${amountText(discount)} при оплате через ${paymentMethodName(
+          code,
+          payments,
+        )}`
       : `Скидка ${amountText(discount)}`;
   }
 
@@ -98,6 +120,7 @@ const discountLine = (discount: Discount): string | null => {
 export const getPlaceDiscountLines = (
   place: DiscountPlace,
   session?: Session | null,
+  payments?: PaymentMethodBrief[],
 ): string[] => {
   if (!session?.discounts?.length) {
     return [];
@@ -112,7 +135,7 @@ export const getPlaceDiscountLines = (
           discount.quantity === 0
         ) && inScope(place, session.id, discount.scopes),
     )
-    .map(discountLine)
+    .map(discount => discountLine(discount, payments))
     .filter((line): line is string => !!line);
 };
 

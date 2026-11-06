@@ -4,6 +4,8 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import {useAtom, useAtomValue, useSetAtom} from 'jotai';
 import {ReactZoomPanPinchRef} from 'react-zoom-pan-pinch';
 
+import {paymentMethodsAtom} from '@atoms/paymentMethods';
+import {schemeUiVersionAtom} from '@atoms/schemeUi';
 import {tempUuidAtom, userAtom} from '@atoms/auth';
 import {getTicketsInCartAtom, ticketsInCartAtom} from '@atoms/cart';
 import {
@@ -44,6 +46,7 @@ export const SchemeRenderer = () => {
   const isSchemeLoading = useAtomValue(isSchemeLoadingAtom);
   const sessionOrder = useAtomValue(sessionOrderAtom);
   const session = useAtomValue(sessionAtom)
+  const paymentMethods = useAtomValue(paymentMethodsAtom);
   const selectedSector = useAtomValue(selectedSectorAtom);
   const parsedTemplateScheme = useAtomValue(parsedTemplateSchemeAtom);
   const tickets = useAtomValue(ticketsInCartAtom);
@@ -131,6 +134,10 @@ export const SchemeRenderer = () => {
     }, 100);
   });
   useRNHandler('urls', useSetAtom(urlsAtom));
+  /** Каталог способов оплаты: нужен только для названия в подсказке. */
+  useRNHandler('paymentMethods', useSetAtom(paymentMethodsAtom));
+  /** Пока сообщения нет, считаем сборку старой и не меняем вёрстку. */
+  useRNHandler('schemeUi', useSetAtom(schemeUiVersionAtom));
   useRNHandler('basketChanged', async ticketsCount => {
     if (ticketsCount !== tickets.length) {
       await getTickets();
@@ -214,13 +221,17 @@ export const SchemeRenderer = () => {
         );
 
         return area
-          ? getPlaceDiscountLines({areaId: area.id}, session)
+          ? getPlaceDiscountLines({areaId: area.id}, session, paymentMethods)
           : [];
       }
 
-      return getPlaceDiscountLines(getElementPlace(element), session);
+      return getPlaceDiscountLines(
+        getElementPlace(element),
+        session,
+        paymentMethods,
+      );
     },
-    [session],
+    [paymentMethods, session],
   );
 
   const handleClick = useCallback(
