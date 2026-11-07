@@ -4,8 +4,15 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import {useAtom, useAtomValue, useSetAtom} from 'jotai';
 import {ReactZoomPanPinchRef} from 'react-zoom-pan-pinch';
 
+import classNames from 'classnames';
+
 import {paymentMethodsAtom} from '@atoms/paymentMethods';
-import {schemeUiVersionAtom} from '@atoms/schemeUi';
+import {
+  appBackgroundAtom,
+  appOverlayAtom,
+  LEGACY_SCHEME_UI,
+  schemeUiVersionAtom,
+} from '@atoms/schemeUi';
 import {tempUuidAtom, userAtom} from '@atoms/auth';
 import {getTicketsInCartAtom, ticketsInCartAtom} from '@atoms/cart';
 import {
@@ -47,6 +54,15 @@ export const SchemeRenderer = () => {
   const sessionOrder = useAtomValue(sessionOrderAtom);
   const session = useAtomValue(sessionAtom)
   const paymentMethods = useAtomValue(paymentMethodsAtom);
+  /**
+   * Пока приложение не прислало своё поколение вёрстки, считаем сборку
+   * старой: там шапка и панель лежат поверх вебвью, и схема должна
+   * занимать весь экран, как раньше.
+   */
+  const isColumnUi = useAtomValue(schemeUiVersionAtom) > LEGACY_SCHEME_UI;
+  /** Цвет берём только в новой вёрстке: в старой схема и так на весь экран. */
+  const appBackground = useAtomValue(appBackgroundAtom);
+  const background = (isColumnUi && appBackground) || undefined;
   const selectedSector = useAtomValue(selectedSectorAtom);
   const parsedTemplateScheme = useAtomValue(parsedTemplateSchemeAtom);
   const tickets = useAtomValue(ticketsInCartAtom);
@@ -67,6 +83,10 @@ export const SchemeRenderer = () => {
 
   const zoomRef = useRef<ReactZoomPanPinchRef | null>(null);
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  /** Читает наблюдатель за размером — ему нужно свежее, а не из замыкания. */
+  const ticketsCountRef = useRef(0);
+  const isColumnUiRef = useRef(false);
   /** Идёт добавление места в корзину, а не загрузка схемы. */
   const [isPlacePending, setIsPlacePending] = useState(false);
 
@@ -108,6 +128,7 @@ export const SchemeRenderer = () => {
   }, [parsedScheme, session]);
 
   useEffect(() => {
+    ticketsCountRef.current = tickets.length;
     sendMessageToRN('basketChanged', tickets.length);
   }, [tickets.length]);
 
@@ -138,6 +159,10 @@ export const SchemeRenderer = () => {
   useRNHandler('paymentMethods', useSetAtom(paymentMethodsAtom));
   /** Пока сообщения нет, считаем сборку старой и не меняем вёрстку. */
   useRNHandler('schemeUi', useSetAtom(schemeUiVersionAtom));
+  /** Фон экрана приложения — схема встаёт с ним в один столбец. */
+  useRNHandler('backgroundColor', useSetAtom(appBackgroundAtom));
+  /** Завеса модалки — общая со светом, которым приложение гасит шапку. */
+  useRNHandler('overlayColor', useSetAtom(appOverlayAtom));
   useRNHandler('basketChanged', async ticketsCount => {
     if (ticketsCount !== tickets.length) {
       await getTickets();
@@ -188,11 +213,50 @@ export const SchemeRenderer = () => {
     }
   }, [sessionOrder]);
 
+  /**
+   * Поколение вёрстки приходит сообщением уже после того, как зал
+   * проинициализировался, поэтому наблюдатель читает его из ссылки.
+   */
+  useEffect(() => {
+    isColumnUiRef.current = isColumnUi;
+  }, [isColumnUi]);
+
+  /** Следить за окном зала перестаём вместе с экраном. */
+  useEffect(() => () => resizeObserverRef.current?.disconnect(), []);
+
   const handleContentInit = useCallback(
     async (ref: ReactZoomPanPinchRef) => {
       const svgContainer = ref.instance.contentComponent;
 
       svgContainerRef.current = svgContainer;
+
+      /**
+       * Зал центруется один раз, на запуске. Но полоса чипов появляется
+       * позже: цены известны только из разобранной схемы, — и окно зала от
+       * неё становится ниже, а зал остаётся стоять по старому центру.
+       * Поэтому следим за размером окна и центруем заново.
+       */
+      const wrapper = ref.instance.wrapperComponent;
+
+      if (wrapper && !resizeObserverRef.current) {
+        resizeObserverRef.current = new ResizeObserver(() => {
+          /**
+           * У старых сборок приложения зал и так на весь экран, и ничего
+           * его не двигает — там не вмешиваемся вовсе. С первым выбранным
+           * местом замолкаем тоже: человек уже работает с залом, и двигать
+           * его под пальцем нельзя.
+           */
+          if (
+            isColumnUiRef.current &&
+            !ticketsCountRef.current &&
+            zoomRef.current?.instance.transformState.scale === 1
+          ) {
+            zoomRef.current.centerView(undefined, 0);
+          }
+        });
+
+        resizeObserverRef.current.observe(wrapper);
+      }
 
       if (svgContainer) {
 
@@ -303,13 +367,19 @@ export const SchemeRenderer = () => {
   }
 
   return (
-    <div className={styles.mainContainer}>
+    <div
+      style={background ? {background} : undefined}
+      className={classNames(styles.mainContainer, {
+        [styles.column]: isColumnUi,
+      })}>
       <SchemeControl
         zoomRef={zoomRef}
         onInit={handleContentInit}
         svgContainerRef={svgContainerRef}
         scheme={parsedScheme || parsedTemplateScheme}
         onClick={handleClick}
+        background={background}
+        heightClass={isColumnUi ? styles.schemeFill : undefined}
         placeExtraLines={getPlaceLines}
       />
       {!session?.outerSessionId && <PriceFilter/>}

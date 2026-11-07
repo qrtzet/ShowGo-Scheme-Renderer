@@ -1,4 +1,9 @@
 import {selectedSeatPriceAtom, selectedSectorAtom} from '@atoms/scheme';
+import {
+  appOverlayAtom,
+  LEGACY_SCHEME_UI,
+  schemeUiVersionAtom,
+} from '@atoms/schemeUi';
 import {sessionAtom, sessionOrderAtom, sessionOrderSchemesAtom} from '@atoms/session';
 import {themeAtom} from '@atoms/theme';
 import {SchemeControl} from '@components/SchemeControl';
@@ -28,6 +33,13 @@ export const SchemeTemplateModal = ({
   scheme,
 }: SchemeTemplateModalProps) => {
   const theme = useAtomValue(themeAtom);
+  /**
+   * В новой вёрстке шапка приложения больше не лежит поверх вебвью, и
+   * отступ в 160px, которым модалка её обходила, стал пустотой сверху.
+   */
+  const isColumnUi = useAtomValue(schemeUiVersionAtom) > LEGACY_SCHEME_UI;
+  /** Завеса общая с приложением: им же гасятся шапка и нижняя панель. */
+  const appOverlay = useAtomValue(appOverlayAtom);
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const sessionOrder = useAtomValue(sessionOrderAtom);
   const orderSchemes = useAtomValue(sessionOrderSchemesAtom)
@@ -76,7 +88,7 @@ export const SchemeTemplateModal = ({
       content: {
         background: theme === 'dark' ? '#19242d' : colors.white,
         border: 'none',
-        top: 160,
+        top: isColumnUi ? 16 : 160,
         left: 12,
         bottom: 100,
         right: 12,
@@ -85,9 +97,11 @@ export const SchemeTemplateModal = ({
         display: 'block',
         borderRadius: 12,
       },
-      overlay: {background: colors['extra-blur']},
+      overlay: {
+        background: (isColumnUi && appOverlay) || colors['extra-blur'],
+      },
     }),
-    [theme],
+    [appOverlay, isColumnUi, theme],
   );
 
   const handleContentInit = useCallback(
@@ -165,7 +179,7 @@ export const SchemeTemplateModal = ({
           svgContainerRef={svgContainerRef}
           scheme={scheme}
           onClick={handleClick}
-          heightClass={styles.height}
+          heightClass={isColumnUi ? styles.heightColumn : styles.height}
         />
       </div>
     </Modal>

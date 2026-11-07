@@ -22,6 +22,10 @@ export type FromNativeActions = {
    * экраном выбора мест; молчание означает старую сборку.
    */
   schemeUi: number;
+  /** Фон экрана в приложении — чтобы схема не выглядела чужой полосой. */
+  backgroundColor: string;
+  /** Цвет завесы модалки: шапку и панель гасит само приложение. */
+  overlayColor: string;
   urls: URLs;
   sessionSlug: string;
   basketChanged: number;

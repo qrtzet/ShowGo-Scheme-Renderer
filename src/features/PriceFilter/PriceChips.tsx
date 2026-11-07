@@ -83,9 +83,6 @@ export const PriceChips = () => {
           );
         })}
       </div>
-      <div className={styles.hint} style={{color: colors.grey}}>
-        Сведите пальцы, чтобы приблизить
-      </div>
     </div>
   );
 };

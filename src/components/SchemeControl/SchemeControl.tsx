@@ -23,6 +23,11 @@ export type SchemeControlProps = {
   isInModal?: boolean;
   heightClass?: string;
   /**
+   * Фон окна зала. В новой вёрстке его задаёт приложение, чтобы схема и
+   * нативная шапка стояли на одном цвете; без него остаётся свой серый.
+   */
+  background?: string;
+  /**
    * Что добавить в подсказку к месту или зоне — у нас это скидки на них.
    * Знание о скидках живёт в SchemeRenderer, у которого есть сеанс.
    */
@@ -36,6 +41,7 @@ export const SchemeControl = ({
   scheme,
   onClick,
   heightClass,
+  background,
   isInModal = false,
   placeExtraLines,
 }: SchemeControlProps) => {
@@ -107,7 +113,8 @@ export const SchemeControl = ({
         <TransformComponent
           contentClass={classNames(styles.content, heightClass)}
           wrapperStyle={{
-            backgroundColor: theme === 'dark' ? '#212121' : '#ebebeb',
+            backgroundColor:
+              background || (theme === 'dark' ? '#212121' : '#ebebeb'),
           }}
           wrapperClass={classNames(styles.container, heightClass, {
             [styles.modal]: isInModal,
